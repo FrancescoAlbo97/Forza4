@@ -67,15 +67,15 @@ win() :-
           on(X1, Y, A),
           on(X2, Y, A),
           on(X3, Y, A),
-          write('vinto');
+          nl, write('vinto '), write(A), nl;
           on(X, Y1, A),
           on(X, Y2, A),
           on(X, Y3, A),
-          write('vinto');
+          nl, write('vinto '), write(A), nl;
           on(X1, Y1, A),
           on(X2, Y2, A),
           on(X3, Y3, A),
-          write('vinto');
+          nl, write('vinto '), write(A), nl;
           on(Xm1, Y1, A),
           on(Xm2, Y2, A),
           on(Xm3, Y3, A)
@@ -132,8 +132,75 @@ test_avv(R,G) :-
    length(L3, R3),
    R = (R1*1)+(R2*5)+(R3*100).
 
+giochiamo():-
+    retractall(on(_,_,a)),
+    retractall(on(_,_,b)),
+    write('Vuoi iniziare tu? si o no '),
+    read(A),
+    inizio(A).
 
+inizio(A):-
+    A == 'si', nl,
+    write('scegli colonna:'),
+    read(X),
+    mossa(X,a,_),
+    print,
+    partita();
+    partita().
 
+partita():-
+    win(),
+    nl, write('game over').
+partita():-
+    gioca(C), !, nl,
+    write('ho inserito in colonna:'),
+    write(C), nl,
+    print,
+    partita_avv().
+
+partita_avv():-
+    win(),
+    nl, write('game over').
+
+partita_avv():-
+    nl, write('scegli colonna:'),
+    read(X),
+    prova_mossa(X),
+    !,
+    print,
+    partita().
+
+prova_mossa(X):-
+    mossa(X,a,E),
+    E \= 1;
+    nl, write('colonna piena, riprova'),
+    partita_avv().
+
+print :-
+    print_board(1,6).
+
+print_board(8,1) :-
+    nl, !.
+print_board(8,Y) :-
+    nl,
+    NY is Y-1,
+    print_board(1,NY), !.
+print_board(X,Y) :-
+    X < 8,
+    Y < 7,
+    (
+      on(X,Y,a),
+      write('O'),
+      tab(2);
+      on(X,Y,b),
+      write('X'),
+      tab(2);
+      write('_'),
+      tab(2)
+    ),
+    !,
+    NX is X + 1,
+    print_board(NX,Y).
 
 
 
