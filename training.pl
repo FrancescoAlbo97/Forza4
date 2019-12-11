@@ -16,7 +16,7 @@ allena(Memory, MemoryAA) :-
 % specifica un moltiplicatore che amplifica il range di variazione
 
 modifica([[T|C]|CC], NMemory, M) :-   %ok
-    random_between(0, 20, N),
+    random_between(-5, 5, N),
     modifica(CC, Memory, M),
     T1 is T + (N*M),
     append([T1], C, NT),
@@ -63,7 +63,10 @@ eliminaZeri([[T|C]|CC], NMemory) :-    %se si fa fallire trova altre soluzioni
    % T \== [[]],
     eliminaZeri(CC, Memory),
     (
-        T > 4,
+        (
+            T > 53;
+            T < 46
+        ),
         append([[T|C]], Memory, NMemory);
         NMemory = Memory
     ).
@@ -77,7 +80,7 @@ osserva(Memory, NMemory) :-    %ok
     random_between(1, 6, Y1),
     (
         on(X1, Y1, G),
-        append([0], [G,0,0], Condition1)
+        append([50], [G,0,0], Condition1)
     ),
     random_between(1, 7, X2),
     random_between(1, 6, Y2),

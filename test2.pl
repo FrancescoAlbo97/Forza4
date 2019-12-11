@@ -195,10 +195,8 @@ condizione([], _, _, _).
 
 inizio(A, Memory):-
     A == 'si', nl,
-    write('scegli colonna:'),
-    read(X),
-    mossa(X,a,_),
-    print,
+    partita_human(Memory);
+    A == 'no', nl,
     partita_cpu(Memory);
     A == 'm', nl,
     write(Memory);
