@@ -1,5 +1,3 @@
-%:-[training].
-
 win(Memory, MemoryA) :-
     on(X, Y, A),
     A \== 'c',       %non considero i bordi
@@ -31,14 +29,12 @@ win(Memory, MemoryA) :-
           on(Xm3, Y3, A)
      ),
     osserva(Memory, Memory1),
-    write('win, tra osserva'),nl,
     osserva(Memory1, Memory2),
     osserva(Memory2, Memory3),
     osserva(Memory3, Memory4),
     componi(Memory4, Memory5),
     componi(Memory5, Memory6),
-    allena(Memory6, MemoryA),
-    write('win, dopo allena'),nl.
+    allena(Memory6, MemoryA).
 
 win_cpu(A) :-
     on(X, Y, A),

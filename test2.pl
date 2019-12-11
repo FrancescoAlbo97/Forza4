@@ -72,6 +72,9 @@ estendibile(X,Y,DX,DY,L) :-
           L = 0
      ).
 
+giochiamo():-
+    giochiamo([]).
+
 giochiamo(Memory):-
     retractall(on(_,_,a)),
     retractall(on(_,_,b)),
@@ -98,7 +101,6 @@ gioca(C, Memory, G) :-
    simula(6, L5, L6, Memory, G),
    simula(7, L6, L7, Memory, G),
    sort(L7, L),
-   write(L7),
    last(L, _-C),
    mossa(C, b, 0).
 
@@ -109,7 +111,6 @@ simula(C, L, NL, Memory, a) :-
    test(R2, b, Memory, _, _),
    R is R1 - R2,
    anti_mossa(C),
-   %write(R),nl,
    append([R-C], L, NL).
 simula(_,L,L,_,a).
 
@@ -120,18 +121,15 @@ simula(C, L, NL, Memory, b) :-
    test(R2, a, Memory, _, _),
    R is R1 - R2,
    anti_mossa(C),
-   %write(R),nl,
    append([R-C], L, NL).
 simula(_,L,L,_,b).
 
 
 test(R, G, [[T|C]|CC], X, Y) :-            % [[P1, b, 0, 0, a, 3, 2], ...]
    findall(1, condizione(C, X, Y, G), L1),
-   %write(L1),nl,
    length(L1, RR),
    R1 is RR * T,
    test(NR, G, CC, _, _),
-   %write(R),nl,
    R is R1 + NR.
 
 test(0, _, [], _, _).
@@ -149,15 +147,15 @@ condizione([S, DX, DY|C], X, Y, a) :-
     ),!,
     plus(X, DX, X1),
     plus(Y, DY, Y1),
-    member(X1, [1,2,3,4,5,6,7]),
-    member(Y1, [1,2,3,4,5,6]),
+    member(X1, [0,1,2,3,4,5,6,7,8]),
+    member(Y1, [0,1,2,3,4,5,6,7]),
     on(X1, Y1, S),
     condizione(C, X, Y, a).
 
 condizione([S, 0, 0|C], X, Y, b) :-
     member(X, [1,2,3,4,5,6,7]),
     member(Y, [1,2,3,4,5,6]),
-       (
+    (
         S == 'a',
         on(X, Y, b);
         S == 'b',
@@ -176,8 +174,8 @@ condizione([S, DX, DY|C], X, Y, b) :-
     ),!,
     plus(X, DX, X1),
     plus(Y, DY, Y1),
-    member(X1, [1,2,3,4,5,6,7]), %inserire il bordo
-    member(Y1, [1,2,3,4,5,6]),
+    member(X1, [0,1,2,3,4,5,6,7,8]), %inserire il bordo
+    member(Y1, [0,1,2,3,4,5,6,7]),
     (
         S == 'a',
         on(X1, Y1, b);
@@ -199,8 +197,9 @@ inizio(A, Memory):-
     A == 'no', nl,
     partita_cpu(Memory);
     A == 'm', nl,
-    write(Memory);
-    partita_cpu(Memory).
+    write(Memory),nl,
+    giochiamo(Memory);
+    giochiamo(Memory).
 
 partita(_, M2, _, M2) :-   %potrebbe vincere all'ultima mossa
     pareggio().
@@ -216,16 +215,16 @@ partita(M1,M2, _, WW) :-
 
 
 partita(M1, M2, a, W):-
-    gioca(_, M1, a), %!,
+    gioca(_, M1, a),
     partita(M1, M2, b, W).
 
 partita(M1, M2, b, W):-
-    gioca(_, M2, b), %!,
+    gioca(_, M2, b),
     partita(M1, M2, a, W).
 
 partita_cpu(Memory):-
     win(Memory, NMemory),
-    nl, write('game over'),
+    nl, write('game over'),nl,
     giochiamo(NMemory).
 
 partita_cpu(Memory):-

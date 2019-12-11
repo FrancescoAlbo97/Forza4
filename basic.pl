@@ -19,7 +19,7 @@ take(Number, [_|C], Element) :-
 
 take(1, [T|_], T).
 
-% restituisce il peso massimo di una lista di liste
+%restituisce il peso massimo di una lista di liste
 
 maxList([[T|_]|C], Peso) :-
     C \== [],
@@ -31,6 +31,20 @@ maxList([[T|_]|C], Peso) :-
     ).
 
 maxList([[T|_]|[]], T).
+
+% restituisce il peso massimo di una lista di liste
+
+minList([[T|_]|C], Peso) :-
+    C \== [],
+    minList(C, MIN),
+    (
+        T < MIN,
+        Peso = T;
+        Peso = MIN
+    ).
+
+minList([[T|_]|[]], T).
+
 
 
 
