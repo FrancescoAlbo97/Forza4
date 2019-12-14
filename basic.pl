@@ -45,6 +45,15 @@ minList([[T|_]|C], Peso) :-
 
 minList([[T|_]|[]], T).
 
+scambia_giocatore(h,h).
+scambia_giocatore(c,c).
+scambia_giocatore(G,G1):-
+    G == a,
+    G1 = b.
+scambia_giocatore(G,G1):-
+    G == b,
+    G1 = a.
+
 
 
 

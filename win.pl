@@ -28,12 +28,12 @@ win(Memory, MemoryA) :-
           on(Xm2, Y2, A),
           on(Xm3, Y3, A)
      ),
-    osserva(Memory, Memory1),
-    osserva(Memory1, Memory2),
-    osserva(Memory2, Memory3),
-    osserva(Memory3, Memory4),
-    componi(Memory4, Memory5),
-    componi(Memory5, Memory6),
+    osserva(4,Memory, Memory1),
+    osserva(4,Memory1, Memory2),
+    osserva(4,Memory2, Memory3),
+    osserva(4,Memory3, Memory4),
+    componi(4,Memory4, Memory5),
+    componi(4,Memory5, Memory6),
     allena(Memory6, MemoryA).
 
 win_cpu(A) :-

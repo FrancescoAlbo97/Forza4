@@ -1,4 +1,5 @@
 :- dynamic on/3.
+:- dynamic storedMemory/1.
 :- [bordi].
 :- [training].
 :- [basic].
@@ -72,10 +73,22 @@ estendibile(X,Y,DX,DY,L) :-
           L = 0
      ).
 
+giochiamoC():-
+    retractall(storedMemory(_)),
+    assert(storedMemory([])),
+    %giochiamo([[20,a,0,0,a,1,0]]).
+    giochiamo([[10,a,0,0,a,0,1],[10,a,0,0,a,1,0],[-20,b,0,0,b,0,1,b,0,2,h,0,3],[-50,b,0,0,b,0,1,b,0,2,b,0,3],[-50,b,0,0,b,1,0,b,2,0,b,3,0],[50,a,0,0,a,0,1,a,0,2,a,0,3]]).
+
 giochiamo():-
+    retractall(storedMemory(_)),
+    assert(storedMemory([])),
     giochiamo([]).
 
 giochiamo(Memory):-
+    storedMemory(SM),
+    append(SM,[Memory],NewMemory),
+    assert(storedMemory(NewMemory)),
+    retract(storedMemory(SM)),
     retractall(on(_,_,a)),
     retractall(on(_,_,b)),
     retractall(on(_,_,h)),
@@ -102,7 +115,7 @@ gioca(C, Memory, G) :-
    simula(7, L6, L7, Memory, G),
    sort(L7, L),
    last(L, _-C),
-   mossa(C, b, 0).
+   mossa(C, G, 0).
 
 simula(C, L, NL, Memory, a) :-
    mossa(C, a, E),
@@ -199,6 +212,10 @@ inizio(A, Memory):-
     A == 'm', nl,
     write(Memory),nl,
     giochiamo(Memory);
+    A == 'g', nl,
+    storedMemory(SM),
+    write(SM),nl,
+    giochiamo(Memory);
     giochiamo(Memory).
 
 partita(_, M2, _, M2) :-   %potrebbe vincere all'ultima mossa
@@ -216,6 +233,7 @@ partita(M1,M2, _, WW) :-
 
 partita(M1, M2, a, W):-
     gioca(_, M1, a),
+    print,
     partita(M1, M2, b, W).
 
 partita(M1, M2, b, W):-
