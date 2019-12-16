@@ -62,17 +62,6 @@ anti_mossa(X) :-
     retract(on(X, 1, _)),
     assert(on(X, 1, h)).
 
-estendibile(X,Y,DX,DY,L) :-
-    X1 is X + DX,
-    Y1 is Y + DY,
-    (
-          on(X1,Y1,h),
-          estendibile(X1,Y1,DX,DY,L1),
-          L is L1 + 1;
-          \+ on(X1,Y1,h),
-          L = 0
-     ).
-
 giochiamoC():-
     retractall(storedMemory(_)),
     assert(storedMemory([])),
@@ -97,13 +86,12 @@ giochiamo(Memory):-
     read(A),
     inizio(A, Memory).
 
-sfida(M1, M2, W) :-
+sfida(M1, M2, W, Hypo, History) :-
     retractall(on(_,_,a)),
     retractall(on(_,_,b)),
     retractall(on(_,_,h)),
     hole(),
-    partita(M1, M2, a, W).
-
+    partita(M1, M2, a, W, Hypo, History).
 
 gioca(C, Memory, G) :-
    simula(1, [], L1, Memory, G),
@@ -125,6 +113,7 @@ simula(C, L, NL, Memory, a) :-
    R is R1 - R2,
    anti_mossa(C),
    append([R-C], L, NL).
+
 simula(_,L,L,_,a).
 
 simula(C, L, NL, Memory, b) :-
@@ -135,6 +124,7 @@ simula(C, L, NL, Memory, b) :-
    R is R1 - R2,
    anti_mossa(C),
    append([R-C], L, NL).
+
 simula(_,L,L,_,b).
 
 
@@ -214,31 +204,41 @@ inizio(A, Memory):-
     giochiamo(Memory);
     A == 'g', nl,
     storedMemory(SM),
+    open('grafici_condizioni/output.txt',write,Out),
+    write(Out,SM),
+    close(Out),
+    process_create(path(python), ['grafici_condizioni/main.py', '--input', 'grafici_condizioni/output.txt'], []),
     write(SM),nl,
     giochiamo(Memory);
     giochiamo(Memory).
 
-partita(_, M2, _, M2) :-   %potrebbe vincere all'ultima mossa
-    pareggio().
+partita(_, M2, _, M2, Hypo, History) :-   %potrebbe vincere all'ultima mossa
+    pareggio(),
+    length(Hypo, N),
+    lista_omogenea(N,[b],History).
 
-partita(M1,M2, _, WW) :-
+partita(M1,M2, _, WW, Hypo, History) :-
     win_cpu(W),
     (
         W == a,
         WW = M1;
         W == b,
         WW = M2
-    ).
+    ),
+    length(Hypo, N),
+    lista_omogenea(N,[W],History).
 
 
-partita(M1, M2, a, W):-
+partita(M1, M2, a, W, Hypo, History):-
+    corrobora(Hypo, R),
     gioca(_, M1, a),
-    print,
-    partita(M1, M2, b, W).
+    %print,
+    partita(M1, M2, b, W, Hypo, NHistory),
+    append2(NHistory, R, History).
 
-partita(M1, M2, b, W):-
+partita(M1, M2, b, W, Hypo, History):-
     gioca(_, M2, b),
-    partita(M1, M2, a, W).
+    partita(M1, M2, a, W, Hypo, History).
 
 partita_cpu(Memory):-
     win(Memory, NMemory),
