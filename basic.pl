@@ -1,14 +1,3 @@
-%unisce due insiemi restituendo al terzo argomento l'insieme risultante
-
-%union([],[],[]).
-%union(List1,[],List1).
-%union(List1, [Head2|Tail2], [Head2|Output]):-
-%    \+(member(Head2,List1)),
-%    union(List1,Tail2,Output).
-%union(List1, [Head2|Tail2], Output):-
-%    member(Head2,List1),
-%    union(List1,Tail2,Output).
-
 %prende n-esimo elemento della lista
 %take(+Number,+List,-Element)
 
@@ -63,13 +52,28 @@ append2([T|C], [T1|C1], R) :-
 
 append2([] , [], []).
 
+%crea una lista L di N elementi A identici
+
 lista_omogenea(N, A, L) :-
     length(L, N),
     maplist(=(A), L).
 
+%confronta due liste e restituisce true se sono identiche
 
+confronta([T|C1], [T|C2]) :-
+    confronta(C1, C2).
 
+confronta([], []).
 
+% restituisce l'elemento completo (lista) di una lista di liste
+% descritto con variabili mute
+
+recupera(PElement, [T|C], CElement) :-
+    PElement = T,
+    CElement = T;
+    recupera(PElement, C, CElement).
+
+recupera(_,[],[]).
 
 
 

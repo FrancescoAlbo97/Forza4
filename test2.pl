@@ -6,62 +6,6 @@
 :- [win].
 :- [print].
 
-%mossa(X, G, E) :-
-%    member(X, [1,2,3,4,5,6,7]),
-%    (
-%          \+ on(X, 6, h),
-%          E = 1;
-%          on(X, 6, h),
-%          \+ on(X, 5, h),
-%          retract(on(X, 6, h)),
-%          assert(on(X, 6, G)),
-%          E = 0;
-%          on(X, 5, h),
-%          \+ on(X, 4, h),
-%          retract(on(X, 5, h)),
-%          assert(on(X, 5, G)),
-%          E = 0;
-%          on(X, 4, h),
-%          \+ on(X, 3, h),
-%          retract(on(X, 4, h)),
-%          assert(on(X, 4, G)),
-%          E = 0;
-%          on(X, 3, h),
-%          \+ on(X, 2, h),
-%          retract(on(X, 3, h)),
-%          assert(on(X, 3, G)),
-%          E = 0;
-%          on(X, 2, h),
-%          \+ on(X, 1, h),
-%          retract(on(X, 2, h)),
-%          assert(on(X, 2, G)),
-%          E = 0;
-%          on(X, 1, h),
-%          retract(on(X, 1, h)),
-%          assert(on(X, 1, G)),
-%          E = 0
-%     ).
-
-%anti_mossa(X) :-
-%    \+ on(X, 6, h),
-%    retract(on(X, 6, _)),
-%    assert(on(X, 6, h));
-%    \+ on(X, 5, h),
-%    retract(on(X, 5, _)),
-%    assert(on(X, 5, h));
-%    \+ on(X, 4, h),
-%    retract(on(X, 4, _)),
-%    assert(on(X, 4, h));
-%    \+ on(X, 3, h),
-%    retract(on(X, 3, _)),
-%    assert(on(X, 3, h));
-%    \+ on(X, 2, h),
-%    retract(on(X, 2, _)),
-%    assert(on(X, 2, h));
-%    \+ on(X, 1, h),
-%    retract(on(X, 1, _)),
-%    assert(on(X, 1, h)).
-
 mossa(X,_,1) :-
     altezza_colonna(X,6).
 mossa(X,G,0) :-
@@ -74,17 +18,6 @@ anti_mossa(X) :-
     altezza_colonna(X,H),
     retract(on(X,H,_)),
     assert(on(X,H,h)).
-
-estendibile(X,Y,DX,DY,L) :-
-    X1 is X + DX,
-    Y1 is Y + DY,
-    (
-          on(X1,Y1,h),
-          estendibile(X1,Y1,DX,DY,L1),
-          L is L1 + 1;
-          \+ on(X1,Y1,h),
-          L = 0
-     ).
 
 giochiamoC():-
     retractall(storedMemory(_)),
@@ -131,8 +64,7 @@ sfida(M1, M2, W, Hypo, History) :-
     retractall(on(_,_,b)),
     retractall(on(_,_,h)),
     hole(),
-    partita(M1, M2, a, W, Hypo, History),
-    write('dopo partita').
+    partita(M1, M2, a, W, Hypo, History).
 
 gioca(C, Memory, G) :-
    simula(1, [], L1, Memory, G),
@@ -163,6 +95,7 @@ simula(C, L, NL, Memory, a) :-
    R is R1 - R2,
    anti_mossa(C),
    append([R-C], L, NL).
+
 simula(_,L,L,_,a).
 
 simula(C, L, NL, Memory, b) :-
@@ -172,6 +105,7 @@ simula(C, L, NL, Memory, b) :-
    R is R1 - R2,
    anti_mossa(C),
    append([R-C], L, NL).
+
 simula(_,L,L,_,b).
 
 test(R, G, [[T|C]|CC], X, Y) :-            % [[P1, b, 0, 0, a, 3, 2], ...]
