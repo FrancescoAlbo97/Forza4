@@ -12,13 +12,13 @@ def plot_condition(etichetta, coords, minLimit):
 
     x = [i for (i,_) in coords]
     y = [i for (_,i) in coords]
-    plt.plot(x, y, label=etichetta)
+    plt.plot(x, y, '.-', label=etichetta)
 
 def plot_specific_conditions(conditions, dictionary):
     for condition in conditions:
         x = [i for (i,_) in dictionary[condition]]
         y = [i for (_,i) in dictionary[condition]]
-        plt.plot(x, y, label=condition)
+        plt.plot(x, y, '.-', label=condition)
 
 def main(inputFile, minLimit, selectedConditions):
     with open(inputFile) as f:

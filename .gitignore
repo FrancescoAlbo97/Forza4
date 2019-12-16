@@ -21,6 +21,7 @@
 *.toc
 *.class
 *.bbl
+*.txt
 *.blg
 TAGS
 config.h

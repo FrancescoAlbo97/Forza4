@@ -54,6 +54,20 @@ scambia_giocatore(G,G1):-
     G == b,
     G1 = a.
 
+%append a due dimensioni  append2(AArray, Array, Result)
+
+append2([T|C], [T1|C1], R) :-
+    append2(C, C1, PR),
+    append([T1], T, RR),
+    append([RR], PR, R).
+
+append2([] , [], []).
+
+lista_omogenea(N, A, L) :-
+    length(L, N),
+    maplist(=(A), L).
+
+
 
 
 
