@@ -4,7 +4,7 @@ punteggio_osservazione1(25).
 sogliaMin(-5).
 sogliaMax(5).
 
-inizio_allenamento(Memory, MemoryA) :-
+inizio_allenamento(Memory, NewMemory) :-
     osserva([], Hypo1),
     osserva(Hypo1, Hypo2),
     osserva(Hypo2, Hypo3),
@@ -19,7 +19,7 @@ inizio_allenamento(Memory, MemoryA) :-
     componi(4,Memory, Hypo11, Hypo12),
     componi(4,Memory, Hypo12, Hypo13),
     componi(4,Memory, Hypo13, Hypo14),
-    allena(Memory, Hypo14, MemoryA).
+    allena(Memory, Hypo14, NewMemory).
 
 allena(Memory, Hypo, Winner) :-
     write('allora...   '),nl,
@@ -38,21 +38,29 @@ allena(Memory, Hypo, Winner) :-
 % modifica i pesi di tutte le osservazioni in maniera casuale, con M si
 % specifica un moltiplicatore che amplifica il range di variazione
 
-modifica([[T|C]|CC], NMemory, M) :-   %ok
-    abs(T,TA),
+% T è il peso della condizione, C è il corpo della condizione, CC
+% contiene il resto delle condizioni. NMemory è la nuova memoria in
+% uscita e M è il moltiplicatore che amplifica il range di variazione
+% DA VEDERE: Nome della variabile Memory in modifica(CC, Memory, M).
+
+modifica([[Weight|C]|CC], NMemory, M) :-
+    abs(Weight, AbsWeight),
     rangeMin(Min),
     rangeMax(Max),
     random_between(Min, Max, N),
     modifica(CC, Memory, M),
-    T2 is (T + ((N*(51-TA))/50)*M),
-    round(T2,T1),
-    append([T1], C, NT),
-    append([NT], Memory, NMemory).
+    Weight2 is (Weight + ((N * (51 - AbsWeight)) / 50) * M),
+    round(Weight2, NewWeight),
+    append([NewWeight], C, NewCond),
+    append([NewCond], Memory, NMemory).
 
 modifica([], [], _).
 
 % vengono dai in ingresso 8 giocatori, e viene simulato un torneo ad
 % eliminazione diretta, e viene restituito il vincitore
+
+% H1, ..., H7 array di array che presentano la forma [n1i, n2i, n3i,
+% ..., w]
 
 torneo(M0, M1, M2, M3, M4, M5, M6, M7, Hypo, NWinner) :-
     sfida(M0, M1, W1, Hypo, H1),
@@ -63,12 +71,14 @@ torneo(M0, M1, M2, M3, M4, M5, M6, M7, Hypo, NWinner) :-
     sfida(W3, W4, WW2, Hypo, H6),
     sfida(WW1, WW2, Winner, Hypo, H7),
     length(Hypo, NHypo),
-    NMatches = 7,
-    nl,nl,write([H1,H2,H3,H4,H5,H6,H7]),nl,nl,
-    impara(Winner, NWinner, Hypo, [H1, H2, H3, H4, H5, H6, H7], NHypo, NMatches).
+    impara(Winner, NWinner, Hypo, [H1, H2, H3, H4, H5, H6, H7], NHypo, 7).
 
-impara(Winner, NNWinner, [[[P|CC]]|C1], Matches, Tot, NMatches) :-
-%   write('impara'),nl,
+% DA VEDERE CON ALBO
+% NHypoOss indica quale ipotesi stai valutando (distanza rispetto al
+% totale), Matches contiene i dati relativi a tutte le ipotesi nelle
+% varie partite del torneo
+
+impara(Winner, NNWinner, [[[Weight|CC]]|C1], Matches, Tot, NMatches) :-
     length(C1, L),
     NHypoOss is Tot - L,
     impara(Winner, NWinner, C1, Matches, Tot, NMatches),
@@ -77,13 +87,12 @@ impara(Winner, NNWinner, [[[P|CC]]|C1], Matches, Tot, NMatches) :-
         R > NMatches*(3/5),
         (
             NWinner = [],
-            NNWinner = [[P|CC]];
+            NNWinner = [[Weight|CC]];
             NWinner = [[P2|CC1]|CCC],
             (
                 confronta(CC1, CC),
                 NNWinner = [[0|CC1]|CCC];
-                aggiungi_condizione([P|CC], [[P2|CC1]|CCC], NNWinner)
-             %  append([[P|CC]], [[P2|CC1]|CCC], NNWinner)
+                aggiungi_condizione([Weight|CC], [[P2|CC1]|CCC], NNWinner)
             )
         );
         NNWinner = NWinner
@@ -111,12 +120,11 @@ add_cond([T|Cond], Memory, NNMemory) :-
     write('Memory = '),writeln(Memory).
 
 analizza(N, [T|C], R) :-
-%   write('analizza'),nl,
     take(N, T, El),
     analizza(N, C, R1),
     analizza_mosse(El, R2, _),
     (
-        R2 < 1,      %se in quella partita non hai sforato piu di 4 volte
+        R2 < 1,      %se in quella partita non hai sforato piu di 1 volta
         R is R1 + 1;
         R = R1
     ).
@@ -158,12 +166,11 @@ eliminaZeri([[T|C]|CC], NMemory) :-    %se si fa fallire trova altre soluzioni
         NMemory = Memory
     ).
 
-eliminaZeri([], []).                %mmm
+eliminaZeri([], []).
 
 % viene osservata una nuova condizione
 
-osserva( Memory, NNMemory) :-    %ok
-%   write('osserva'),nl,
+osserva( Memory, NNMemory) :-
     prendi_coordinate1(X1,Y1,G1),
     punteggio_osservazione1(P),
     append([P], [G1,0,0], Condition1), %costante inizio
@@ -284,6 +291,19 @@ cambia_condizione2(DY, [G1, X1, Y1|C], A,R):-
    append_ordinato(A, G1,X1,Y, NR),
    cambia_condizione2(DY, C, NR, R);
    cambia_condizione2(DY, C, A, R).
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

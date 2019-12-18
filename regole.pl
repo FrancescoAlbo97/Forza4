@@ -47,6 +47,19 @@ diagonale(A) :-
         on(Xm3, Y3, A)
     ).
 
+mossa(X,_,1) :-
+    altezza_colonna(X,6).
+mossa(X,G,0) :-
+    altezza_colonna(X,H),
+    H1 is H + 1,
+    retract(on(X,H1,h)),
+    assert(on(X,H1,G)).
+
+anti_mossa(X) :-
+    altezza_colonna(X,H),
+    retract(on(X,H,_)),
+    assert(on(X,H,h)).
+
 altezza_colonna(X,H) :-
     findall(Y,(on(X,Y,G),G\=c,G\=h),Col),
     sort(Col,ColOrd),
