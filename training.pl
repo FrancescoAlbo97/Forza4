@@ -82,7 +82,7 @@ impara(Winner, NNWinner, [[[P|CC]]|C1], Matches, Tot, NMatches) :-
             (
                 confronta(CC1, CC),
                 NNWinner = [[0|CC1]|CCC];
-                add_cond([P|CC], [[P2|CC1]|CCC], NNWinner)
+                aggiungi_condizione([P|CC], [[P2|CC1]|CCC], NNWinner)
              %  append([[P|CC]], [[P2|CC1]|CCC], NNWinner)
             )
         );
@@ -189,7 +189,7 @@ prendi_coordinate1(X1,Y1,G1):-
     prendi_coordinate1(X1,Y1,G1).
 
 prendi_coordinate2(X1,Y1,X2,Y2):-
-    random_between(0, X1, X2),
+    random_between(X1, 8, X2),
     random_between(0, 7, Y2),
     (
          X1 \= X2;
@@ -222,23 +222,22 @@ componi(Conta,Memory,Hypo,NNHypo) :-      %ok
         length(Memory, Len),
         Len > 1,             %per comporre devo avere almeno 2 elementi
         random_between(1, Len, N1),
-        prendi_numero2(Len, N1, N2),!,
-        take(N1, Memory, [_,G,_,_|C1]),
+        prendi_numero2(Len, N1, N2),
+        take(N1, Memory, [_,G,_,_|C]),
         take(N2, Memory, [_,G1,_,_,G2,X,Y|_]),
         G == G1,
-        append_ordinato(C1,G2,X,Y,R),
+        append_ordinato(C,G2,X,Y,R),
         punteggio_osservazione1(P),
         P2 is -1 * P,
-        append([P,G,0,0], R, C),
+        append([P,G,0,0], R, C1),
         append([P2,G,0,0], R, C2),
-        append([[C]], Hypo, NHypo),
+        append([[C1]], Hypo, NHypo),
         append([[C2]], NHypo, NNHypo);
         Conta1 is Conta - 1,
         componi(Conta1, Memory, Hypo, NNHypo)
     ).
 
 append_ordinato([G,X,Y|C],G1,X1,Y1,R) :-
-%   write('append'),nl,
     X1 < X,
     append([G1,X1,Y1,G,X,Y],C,R);
     X1 == X,
@@ -246,18 +245,45 @@ append_ordinato([G,X,Y|C],G1,X1,Y1,R) :-
     append([G1,X1,Y1,G,X,Y],C,R);
     X1 == X,
     Y1 == Y,
-    append([G,X,Y],C,R);
+    R = [];
     append_ordinato(C,G1,X1,Y1,NR),
-    append(NR,[G,X,Y],R).
+    append([G,X,Y],NR,R).
 
 append_ordinato([], G1, X1, Y1, [G1, X1, Y1]).
 
 prendi_numero2(Len, N1, N2) :-
-%   write(prendi_numero2),nl,
     random_between(1, Len, N2),
     N1 \= N2;
-    prendi_numero2(Len, N1, N2).
+    prendi_numero2(Len, N1, N2),!.
 
+aggiungi_condizione([T,G,_,_|Cond], Memory, NNMemory):-
+    relativo(G, Cond, Cond, Memory),
+    add_cond([T,G,0,0|Cond], Memory, NNMemory).
+aggiungi_condizione(_,Memory,Memory).
+
+relativo(_,[],_,_).
+relativo(G, [G1, DX, DY|C], Cond, Memory):-
+    DX \= 0,
+    relativo(G,C,Cond,Memory);
+    delete(Cond,[G1,DX,DY], Cond1),
+    cambia_condizione(DY, Cond1, R),!,
+    Y is DY*(-1),
+    append_ordinato(R,G,0,Y,R1),
+    append([G1,0,0], R1, NewCond),
+    \+ member([_|NewCond],Memory),
+    relativo(G,C,Cond,Memory).
+
+cambia_condizione(DY,L, R):-
+    Y is DY*(-1),
+    cambia_condizione2(Y,L,[],R),!.
+
+cambia_condizione2(_,[],A,A).
+cambia_condizione2(DY, [G1, X1, Y1|C], A,R):-
+   Y is Y1 + DY,
+   Y \= 0,
+   append_ordinato(A, G1,X1,Y, NR),
+   cambia_condizione2(DY, C, NR, R);
+   cambia_condizione2(DY, C, A, R).
 
 
 

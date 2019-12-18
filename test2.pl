@@ -5,6 +5,7 @@
 :- [basic].
 :- [win].
 :- [print].
+:- [albero].
 
 mossa(X,_,1) :-
     altezza_colonna(X,6).
@@ -211,13 +212,17 @@ partita(M1,M2, _, WW, Hypo, History) :-
 
 partita(M1, M2, a, W, Hypo, History):-
     corrobora(Hypo,R),
-    gioca(_, M1, a),
-    %print,
+    minimax(a,C,2,M1,_),
+    mossa(C,a,_),
+    %gioca(_, M1, a),
+    print,
     partita(M1, M2, b, W, Hypo, NHistory),
     append2(NHistory, R, History).
 
 partita(M1, M2, b, W, Hypo, History):-
-    gioca(_, M2, b),
+    %gioca(_, M2, b),
+    minimax(b,C,2,M2,_),
+    mossa(C,b,_),
     partita(M1, M2, a, W, Hypo, History).
 
 partita_cpu(Memory,0) :-
@@ -229,7 +234,9 @@ partita_cpu(Memory,1) :-
     inizio_allenamento(Memory,NewMemory),
     giochiamo(NewMemory,1).
 partita_cpu(Memory,Allena):-
-    gioca(_, Memory, b), !, nl,
+    %gioca(_, Memory, b), !, nl,
+    minimax(b,Mossa,2,Memory,_),
+    mossa(Mossa,b,_),
     print,
     partita_human(Memory,Allena).
 
