@@ -24,7 +24,8 @@ partita(M1,M2, _, WW, Hypo, History) :-
 
 partita(M1, M2, a, W, Hypo, History):-
     corrobora(Hypo,R),
-    minimax(a,C,2,M1,_),
+    %minimax(a,C,2,M1,_),
+    alpha_beta(a,C,2,M1,_),
     mossa(C,a,_),
     %gioca(_, M1, a),
     print,
@@ -33,6 +34,7 @@ partita(M1, M2, a, W, Hypo, History):-
 
 partita(M1, M2, b, W, Hypo, History):-
     %gioca(_, M2, b),
-    minimax(b,C,2,M2,_),
+    %minimax(b,C,2,M2,_),
+    alpha_beta(b,C,2,M2,_),
     mossa(C,b,_),
     partita(M1, M2, a, W, Hypo, History).

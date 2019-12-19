@@ -70,9 +70,19 @@ partita_cpu(Memory,1) :-
     win(_),
     inizio_allenamento(Memory,NewMemory),
     giochiamo(NewMemory,1).
+partita_cpu(Memory,Allena) :-
+    pareggio(),
+    nl, write('partita patta'),nl,
+    giochiamo(Memory,Allena).
 partita_cpu(Memory,Allena):-
     %gioca(_, Memory, b), !, nl,
-    minimax(b,Mossa,2,Memory,_),
+    %minimax(b,Mossa2,2,Memory,_),
+    alpha_beta(b,Mossa,2,Memory,_),
+    %(
+    %    Mossa == Mossa2;
+    %    Mossa \= Mossa2,
+    %    write('mismatch')
+    %),
     mossa(Mossa,b,_),
     print,
     partita_human(Memory,Allena).
@@ -86,6 +96,10 @@ partita_human(Memory,1):-
     nl, write('game over'),
     inizio_allenamento(Memory,NewMemory),
     giochiamo(NewMemory,1).
+partita_human(Memory,Allena) :-
+    pareggio(),
+    nl, write('partita patta'),nl,
+    giochiamo(Memory,Allena).
 partita_human(Memory,Allena):-
     nl, write('scegli colonna:'),
     read(X),

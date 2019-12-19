@@ -26,24 +26,47 @@ check_foglia(_,_,0,_) :-
 check_foglia(G,Memory,Punteggio,0) :-
     punteggio_stato(Memory,Punteggio,G).
 
-% VEDERE PERCHE' FINISCE CON SEQUENZA 1,2,3,1,7,2,3,1,2,3
+cutoff(Alpha,Beta) :-
+   Beta =< Alpha.
+   %writeln('CUTOFF!!').
+
+aggiorna_alpha_beta(a,Alpha,Beta,Value,Alpha,Value) :-
+   Value =< Beta, !.
+aggiorna_alpha_beta(a,Alpha,Beta,Value,Alpha,Beta) :-
+   Value > Beta.
+aggiorna_alpha_beta(b,Alpha,Beta,Value,Value,Beta) :-
+   Value >= Alpha, !.
+aggiorna_alpha_beta(b,Alpha,Beta,Value,Alpha,Beta) :-
+   Value < Beta.
+
+
+% RIVEDERE IMPLEMENTAZIONE ALFA BETA
 % PER ORA ASSUMO CHE b = giocatore MAX e a = giocatore MIN
+% SE FA IL CUTOFF IL VALORE NON VA AGGIORNATO
 
 alpha_beta(G,Mossa,Depth,Memory,Value) :-
     azioni_successori(Azioni),
     StartingDepth is Depth - 1,
-    alpha_beta(G,Memory,Mossa,Azioni,StartingDepth,Value,Alpha,Beta,_,1),
+    alpha_beta(G,Memory,Mossa,Azioni,StartingDepth,Value,-100000,100000,_,1),
     !.
 
-alpha_beta(G,Memory,Mossa,[],Depth,Value,Alpha,Beta,Value-Mossa,Start).
+alpha_beta(_,_,Mossa,[],_,Value,_,_,Value-Mossa,_).
+alpha_beta(_,_,Mossa,_,_,Value,Alpha,Beta,Value-Mossa,_) :-
+   cutoff(Alpha,Beta).
+   %nl,write(Mossa),nl,write(Value),nl,write(Alpha),nl,write(Beta),nl.
 alpha_beta(G,Memory,Mossa,[T|C],Depth,Value,Alpha,Beta,ValueAcc,Start) :-
     mossa(T,G,_),
+    !,
     azioni_successori(NewActions),
     (
-        check_foglia(G,Memory,NValue,Depth);
+        check_foglia(G,Memory,NValue,Depth),
+        %NewAlpha = Alpha,
+        %NewBeta = Beta;
+        aggiorna_alpha_beta(G,Alpha,Beta,NValue,NewAlpha,NewBeta);
         NewDepth is Depth - 1,
         change_player(G,G1),
-        alpha_beta(G1,Memory,_,NewActions,NewDepth,NValue,Alpha,Beta,0-0,1)
+        alpha_beta(G1,Memory,_,NewActions,NewDepth,NValue,Alpha,Beta,_,1),
+        aggiorna_alpha_beta(G,Alpha,Beta,NValue,NewAlpha,NewBeta)
     ),
     (
         Start == 1,
@@ -52,7 +75,9 @@ alpha_beta(G,Memory,Mossa,[T|C],Depth,Value,Alpha,Beta,ValueAcc,Start) :-
         migliore(NValue-T,ValueAcc,G,NewValueAcc)
     ),
     anti_mossa(T),
-    alpha_beta(G,Memory,Mossa,C,Depth,Value,Alpha,Beta,NewValueAcc,0).
+    %nl, write('Giocatore '), write(G), write(', Profondità '), write(Depth), write(', Mossa '), write(T), write(', Alpha|Beta '), write(Alpha), write('|'), write(Beta), nl, write(', Current Best '), write(NewValueAcc), nl,
+    alpha_beta(G,Memory,Mossa,C,Depth,Value,NewAlpha,NewBeta,NewValueAcc,0).
+
 
 minimax(G,Mossa,Depth,Memory,Value) :-
     azioni_successori(Azioni),
@@ -83,11 +108,11 @@ minimax(G,Memory,Mossa,[T|C],Depth,Value,ValueAcc,Start) :-
 % alternative il punteggio migliore per il giocatore
 
 migliore(Value1-Action1,Value2-_,a,Value1-Action1) :-
-    Value1 =< Value2, !.
+    Value1 < Value2, !.
 migliore(Value1-_,Value2-Action2,a,Value2-Action2) :-
-    Value1 > Value2.
+    Value1 >= Value2.
 migliore(Value1-Action1,Value2-_,b,Value1-Action1) :-
-    Value1 >= Value2, !.
+    Value1 > Value2, !.
 migliore(Value1-_,Value2-Action2,b,Value2-Action2) :-
-    Value1 < Value2.
+    Value1 =< Value2.
 
