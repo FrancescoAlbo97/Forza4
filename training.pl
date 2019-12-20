@@ -265,6 +265,7 @@ prendi_numero2(Len, N1, N2) :-
 
 aggiungi_condizione([T,G,_,_|Cond], Memory, NNMemory):-
     relativo(G, Cond, Cond, Memory),
+    inverti_punto_di_vista(G,Cond,Memory),
     add_cond([T,G,0,0|Cond], Memory, NNMemory).
 aggiungi_condizione(_,Memory,Memory).
 
@@ -292,6 +293,16 @@ cambia_condizione2(DY, [G1, X1, Y1|C], A,R):-
    cambia_condizione2(DY, C, NR, R);
    cambia_condizione2(DY, C, A, R).
 
+inverti_punto_di_vista(G,Cond,Memory):-
+    scambia_giocatore(G,G1),
+    inverti_punto_di_vista2(Cond,Cond1),
+    append([G1,0,0], Cond1, NewCond),
+    \+ member([_|NewCond],Memory).
+inverti_punto_di_vista2([],[]).
+inverti_punto_di_vista2([G,X,Y|Cond],NewCond):-
+    inverti_punto_di_vista2(Cond,Cond1),
+    scambia_giocatore(G,G1),
+    append([G1,X,Y],Cond1,NewCond).
 
 
 
