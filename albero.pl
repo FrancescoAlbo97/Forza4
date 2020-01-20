@@ -1,13 +1,9 @@
 change_player(a,b).
 change_player(b,a).
 
-punteggio_stato(Memory,R,a) :-
+punteggio_stato(Memory,R) :-
    test(R1, b, Memory, _, _),
    test(R2, a, Memory, _, _),
-   R is R1 - R2.
-punteggio_stato(Memory,R,b) :-
-   test(R1, a, Memory, _, _),
-   test(R2, b, Memory, _, _),
    R is R1 - R2.
 
 azioni_successori(PosAzioni) :-
@@ -17,18 +13,19 @@ azioni_successori(PosAzioni) :-
                 H < 6
             ),PosAzioni).
 
-check_foglia(_,_,1000,_) :-
-    win(b).
-check_foglia(_,_,-1000,_) :-
-    win(a).
-check_foglia(_,_,0,_) :-
+check_foglia(_,Punteggio,Depth,MaxDepth) :-
+    win(b),
+    Punteggio is 1000000 / (MaxDepth - Depth + 1).
+check_foglia(_,Punteggio,Depth,MaxDepth) :-
+    win(a),
+    Punteggio is -1000000 / (MaxDepth - Depth + 1).
+check_foglia(_,0,_,_) :-
     pareggio().
-check_foglia(G,Memory,Punteggio,0) :-
-    punteggio_stato(Memory,Punteggio,G).
+check_foglia(Memory,Punteggio,0,_) :-
+    punteggio_stato(Memory,Punteggio).
 
 cutoff(Alpha,Beta) :-
    Beta =< Alpha.
-   %writeln('CUTOFF!!').
 
 aggiorna_alpha_beta(a,Alpha,Beta,Value,Alpha,Value) :-
    Value =< Beta, !.
@@ -47,25 +44,22 @@ aggiorna_alpha_beta(b,Alpha,Beta,Value,Alpha,Beta) :-
 alpha_beta(G,Mossa,Depth,Memory,Value) :-
     azioni_successori(Azioni),
     StartingDepth is Depth - 1,
-    alpha_beta(G,Memory,Mossa,Azioni,StartingDepth,Value,-100000,100000,_,1),
+    alpha_beta(G,Memory,Mossa,Azioni,StartingDepth,Value,-10000000,10000000,_,1,Depth),
     !.
 
-alpha_beta(_,_,Mossa,[],_,Value,_,_,Value-Mossa,_).
-alpha_beta(_,_,Mossa,_,_,Value,Alpha,Beta,Value-Mossa,_) :-
+alpha_beta(_,_,Mossa,[],_,Value,_,_,Value-Mossa,_,_).
+alpha_beta(_,_,Mossa,_,_,Value,Alpha,Beta,Value-Mossa,_,_) :-
    cutoff(Alpha,Beta).
-   %nl,write(Mossa),nl,write(Value),nl,write(Alpha),nl,write(Beta),nl.
-alpha_beta(G,Memory,Mossa,[T|C],Depth,Value,Alpha,Beta,ValueAcc,Start) :-
+alpha_beta(G,Memory,Mossa,[T|C],Depth,Value,Alpha,Beta,ValueAcc,Start,MaxDepth) :-
     mossa(T,G,_),
     !,
     azioni_successori(NewActions),
     (
-        check_foglia(G,Memory,NValue,Depth),
-        %NewAlpha = Alpha,
-        %NewBeta = Beta;
+        check_foglia(Memory,NValue,Depth,MaxDepth),
         aggiorna_alpha_beta(G,Alpha,Beta,NValue,NewAlpha,NewBeta);
         NewDepth is Depth - 1,
         change_player(G,G1),
-        alpha_beta(G1,Memory,_,NewActions,NewDepth,NValue,Alpha,Beta,_,1),
+        alpha_beta(G1,Memory,_,NewActions,NewDepth,NValue,Alpha,Beta,_,1,MaxDepth),
         aggiorna_alpha_beta(G,Alpha,Beta,NValue,NewAlpha,NewBeta)
     ),
     (
@@ -75,25 +69,24 @@ alpha_beta(G,Memory,Mossa,[T|C],Depth,Value,Alpha,Beta,ValueAcc,Start) :-
         migliore(NValue-T,ValueAcc,G,NewValueAcc)
     ),
     anti_mossa(T),
-    %nl, write('Giocatore '), write(G), write(', Profondità '), write(Depth), write(', Mossa '), write(T), write(', Alpha|Beta '), write(Alpha), write('|'), write(Beta), nl, write(', Current Best '), write(NewValueAcc), nl,
-    alpha_beta(G,Memory,Mossa,C,Depth,Value,NewAlpha,NewBeta,NewValueAcc,0).
+    alpha_beta(G,Memory,Mossa,C,Depth,Value,NewAlpha,NewBeta,NewValueAcc,0,MaxDepth).
 
 
 minimax(G,Mossa,Depth,Memory,Value) :-
     azioni_successori(Azioni),
     StartingDepth is Depth - 1,
-    minimax(G,Memory,Mossa,Azioni,StartingDepth,Value,_,1),
+    minimax(G,Memory,Mossa,Azioni,StartingDepth,Value,_,1,Depth),
     !.
 
-minimax(_,_,Mossa,[],_,Value,Value-Mossa,_).
-minimax(G,Memory,Mossa,[T|C],Depth,Value,ValueAcc,Start) :-
+minimax(_,_,Mossa,[],_,Value,Value-Mossa,_,_).
+minimax(G,Memory,Mossa,[T|C],Depth,Value,ValueAcc,Start,MaxDepth) :-
     mossa(T,G,_),
     azioni_successori(NewActions),
     (
-        check_foglia(G,Memory,NValue,Depth);
+        check_foglia(Memory,NValue,Depth,MaxDepth);
         NewDepth is Depth - 1,
         change_player(G,G1),
-        minimax(G1,Memory,_,NewActions,NewDepth,NValue,_,1)
+        minimax(G1,Memory,_,NewActions,NewDepth,NValue,_,1,MaxDepth)
     ),
     (
         Start == 1,
@@ -102,7 +95,7 @@ minimax(G,Memory,Mossa,[T|C],Depth,Value,ValueAcc,Start) :-
         migliore(NValue-T,ValueAcc,G,NewValueAcc)
     ),
     anti_mossa(T),
-    minimax(G,Memory,Mossa,C,Depth,Value,NewValueAcc,0).
+    minimax(G,Memory,Mossa,C,Depth,Value,NewValueAcc,0,MaxDepth).
 
 % migliore(+Value1,+Value2,+G,-Result) restituisce tra le due
 % alternative il punteggio migliore per il giocatore
