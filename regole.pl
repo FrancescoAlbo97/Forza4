@@ -1,8 +1,14 @@
+% Dato lo stato corrente, determina se c'è stato un vincitore, e in caso
+% positivo resistuisce il giocatore che ha vinto.
+% win(-Giocatore)
 win(A) :-
    orizzontale(A);
    verticale(A);
    diagonale(A).
 
+% Dato lo stato corrente, determina se c'è stata una vittoria data da
+% quattro gettoni in orizzontale. Restituisce il giocatore che ha vinto.
+% orizzontale(-Giocatore)
 orizzontale(A) :-
     on(X, Y, A),
     A \== 'c',
@@ -14,6 +20,9 @@ orizzontale(A) :-
     on(X2, Y, A),
     on(X3, Y, A).
 
+% Dato lo stato corrente, determina se c'è stata una vittoria data da
+% quattro gettoni in verticale. Restituisce il giocatore che ha vinto.
+% verticale(-Giocatore)
 verticale(A) :-
     on(X, Y, A),
     A \== 'c',
@@ -25,6 +34,9 @@ verticale(A) :-
     on(X, Y2, A),
     on(X, Y3, A).
 
+% Dato lo stato corrente, determina se c'è stata una vittoria data da
+% quattro gettoni in diagonale. Restituisce il giocatore che ha vinto.
+% diagonale(-Giocatore)
 diagonale(A) :-
     on(X, Y, A),
     A \== 'c',
@@ -47,6 +59,10 @@ diagonale(A) :-
         on(Xm3, Y3, A)
     ).
 
+% Esegue una mossa per conto di un giocatore. Se la colonna è piena, il
+% gettone non verrà inserito, e sarà segnalata la presenza della colonna
+% piena.
+% mossa(+X,+G,-E)
 mossa(X,_,1) :-
     altezza_colonna(X,6).
 mossa(X,G,0) :-
@@ -60,6 +76,9 @@ anti_mossa(X) :-
     retract(on(X,H,_)),
     assert(on(X,H,h)).
 
+% Determina l'altezza corrente della colonna, data da tutti i gettoni
+% che sono stati inseriti in essa.
+% altezza_colonna(+X,-H)
 altezza_colonna(X,H) :-
     findall(Y,(on(X,Y,G),G\=c,G\=h),Col),
     sort(Col,ColOrd),
@@ -67,10 +86,13 @@ altezza_colonna(X,H) :-
     !.
 altezza_colonna(_,0).
 
+% Determina se c'è stata una condizione di pareggio. Ciò avviene quando
+% tutti gli spazi della riga più alta sono occupati.
 pareggio() :-
     \+ on(1,6,h),
     \+ on(2,6,h),
     \+ on(3,6,h),
     \+ on(4,6,h),
     \+ on(5,6,h),
-    \+ on(6,6,h).
+    \+ on(6,6,h),
+    \+ on(7,6,h).

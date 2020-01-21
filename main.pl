@@ -1,39 +1,44 @@
 :- dynamic on/3.
 :- dynamic storedMemory/1.
+:- dynamic memory/1.
 :- [bordi].
 :- [training].
 :- [basic].
+:- [campionato].
 :- [regole].
 :- [print].
 :- [albero].
 :- [gioco_cpu].
 :- [strategia_cpu].
+:- [genetica].
+:- [impara_da_solo].
 
-giochiamo():-
-    retractall(storedMemory(_)),
+profondita(2).
+
+inizializza():-
     assert(storedMemory([])),
-    giochiamo([],1).
-
-giochiamo(Memory):-
+    assert(memory([])),
     retractall(storedMemory(_)),
+    retractall(memory(_)),
     assert(storedMemory([])),
-    giochiamo(Memory,1).
+    assert(memory([])).
 
-gioca_senza_apprendimento(Memory) :-
-    giochiamo(Memory,0).
+forza4():-
+    inizializza(),
+    write('inserisci la memoria di partenza: '),nl,
+    read(M),
+    assert(memory(M)),
+    giochiamo_con_memoria().
 
-giochiamo(Memory,0):-
-    retractall(on(_,_,a)),
-    retractall(on(_,_,b)),
-    retractall(on(_,_,h)),
-    hole(),
-    write('Vuoi iniziare tu? si o no '),
-    read(A),
-    inizio(A, Memory, 0).
-giochiamo(Memory,1):-
+giochiamo_con_memoria():-
+    memory(M),
+    giochiamo_insieme(M),
+    giochiamo_con_memoria().
+
+giochiamo_insieme(Knowledge):-
     storedMemory(SM),
-    append(SM,[Memory],NewMemory),
-    assert(storedMemory(NewMemory)),
+    append(SM,[Knowledge],NKnowledge),
+    assert(storedMemory(NKnowledge)),
     retract(storedMemory(SM)),
     retractall(on(_,_,a)),
     retractall(on(_,_,b)),
@@ -41,78 +46,75 @@ giochiamo(Memory,1):-
     hole(),
     write('Vuoi iniziare tu? si o no '),
     read(A),
-    inizio(A, Memory, 1).
+    inizio(A, Knowledge).
 
-inizio(A, Memory, Allena):-
+inizio(A, Knowledge):-
     A == 'si', nl,
-    partita_human(Memory,Allena);
+    partita_umano(Knowledge);
     A == 'no', nl,
-    partita_cpu(Memory, Allena);
+    partita_cpu(Knowledge);
     A == 'm', nl,
-    write(Memory),nl,
-    giochiamo(Memory, Allena);
+    write(Knowledge),nl,
+    giochiamo_insieme(Knowledge);
     A == 'g',
-    Allena == 1, nl,
     storedMemory(SM),
     open('grafici_condizioni/output.txt',write,Out),
     write(Out,SM),
     close(Out),
     process_create(path(python3), ['grafici_condizioni/main.py', '--input', 'grafici_condizioni/output.txt'], []),
     write(SM),nl,
-    giochiamo(Memory, Allena);
-    giochiamo(Memory, Allena).
+    giochiamo_insieme(Knowledge);
+    giochiamo_insieme(Knowledge).
 
-partita_cpu(Memory,0) :-
+partita_cpu(Knowledge) :-
     win(_),
-    nl, write('game over'),nl,
-    giochiamo(Memory,0).
-partita_cpu(Memory,1) :-
-    win(_),
-    inizio_allenamento(Memory,NewMemory),
-    giochiamo(NewMemory,1).
-partita_cpu(Memory,Allena) :-
-    pareggio(),
-    nl, write('partita patta'),nl,
-    giochiamo(Memory,Allena).
-partita_cpu(Memory,Allena):-
-    %gioca(_, Memory, b), !, nl,
-    %minimax(b,Mossa2,2,Memory,_),
-    alpha_beta(b,Mossa,2,Memory,_),
-    %(
-    %    Mossa == Mossa2;
-    %    Mossa \= Mossa2,
-    %    write('mismatch')
-    %),
-    mossa(Mossa,b,_),
     print,
-    partita_human(Memory,Allena).
+    nl, write('game over'),nl,
+    write('quante generazioni creo?'),
+    read(A),
+    inizio_allenamento(Knowledge, NKnowledge, A),
+    retractall(memory(_)),
+    assert(memory(NKnowledge)).
 
-partita_human(Memory,0):-
-    win(_),
-    nl, write('game over'),
-    giochiamo(Memory,0).
-partita_human(Memory,1):-
-    win(_),
-    nl, write('game over'),
-    inizio_allenamento(Memory,NewMemory),
-    giochiamo(NewMemory,1).
-partita_human(Memory,Allena) :-
+partita_cpu(_) :-
     pareggio(),
-    nl, write('partita patta'),nl,
-    giochiamo(Memory,Allena).
-partita_human(Memory,Allena):-
+    print,
+    nl, write('partita patta'),nl.
+
+partita_cpu(Knowledge):-
+    profondita(P),
+    alpha_beta(b, Mossa, P, Knowledge, _),
+    mossa(Mossa, b, _),
+    print,
+    partita_umano(Knowledge).
+
+partita_umano(Knowledge):-
+    win(_),
+    print,
+    nl, write('game over'),nl,
+    write('quante generazioni produco? '),
+    read(A),
+    inizio_allenamento(Knowledge, NKnowledge, A),
+    retractall(memory(_)),
+    assert(memory(NKnowledge)).
+
+partita_umano(_) :-
+    pareggio(),
+    print,
+    nl, write('partita patta'),nl.
+
+partita_umano(Knowledge):-
     nl, write('scegli colonna:'),
     read(X),
-    prova_mossa(X,Memory,Allena),
+    prova_mossa(X, Knowledge),
     !,
-    print,
-    partita_cpu(Memory,Allena).
+    partita_cpu(Knowledge).
 
-prova_mossa(X, Memory, Allena):-
+prova_mossa(X, Knowledge):-
     mossa(X,a,E),
     E \= 1;
     nl, write('colonna piena, riprova'),
-    partita_human(Memory, Allena).
+    partita_umano(Knowledge).
 
 
 

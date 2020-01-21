@@ -1,52 +1,92 @@
-campionato(L, Hypo, NWinner):-
-    gironi(L,L,Hypo,Classifica,HypoList, NMatches),
-    %nl, write('HypoList = '), write(HypoList), nl,
-    conta(L,Classifica, NewClassifica),
-    nl, nl, write(' fine campionato, il numero di match è '), write(NMatches), nl, nl,
-    %findall(C-X,(member(X,L),conta_occorrenze(X,Classifica,C)),Occorrenze),
-    sort(NewClassifica, ClassificaOrdinata),
-    last(ClassificaOrdinata,_-Winner),
-    length(Hypo,NHypo),
-    impara(Winner,NWinner,Hypo,HypoList,NHypo,NMatches).
+%il campionato è una modilita di sfide tra le diverse memorie create,
+% funziona come un unico girone all'italiana con una classifica a punti
+% una volta svoltosi il girone basterà ordinare la classifica per punti
+% e restituire il vincitore.
+campionato(L, Winner):-
+    girone(L,Classifica),
+    sort(Classifica, ClassificaOrdinata),
+    last(ClassificaOrdinata,_-Winner).
 
-conta([],_,[]).
-conta([T|C], Classifica, NewClassifica):-
-    conta(C, Classifica, Class),
-    conta_occorrenze(T,Classifica,Occorrenze),
-    append(Class,[Occorrenze-T],NewClassifica).
+% data una lista di memorie, crea una classifica vuota e poi avvia
+% un girone on le sfide di una giornata e poi unisce i punti con
+% le classifiche successive
+%girone(-ListadiMemorie, +ClassificaNuova)
+girone([],[]).
+girone([T|C],Classifica) :-
+    girone(C,Classifica1),
+    sfide(T,C,[T|C],Classifica2),
+    unisci_classifiche(Classifica1,Classifica2,Classifica).
 
-gironi([],_,_,[],[],0).
-gironi(L,[T|C],Hypo,NewClassifica,HypoList,NMatches):-
-    sfide(T,C,Hypo,Classifica,SHypoList,SfideNMatches),
-    delete(L,T,L1),
-    append(C,[T],L2),
-    gironi(L1, L2, Hypo, Class, OldHypoList,OldNMatches), %corregere C
-    append(Class, Classifica, NewClassifica),
-    append(OldHypoList, SHypoList, HypoList),
-    NMatches is OldNMatches + SfideNMatches.
+%sfide lancia sfida tra 2 memorie ed aggiorna la classifica
+%sfide(-Sfidante, -RestodelleMemorie, -L, +Classifica)
+sfide(_,[],L,Classifica):-
+    crea_classifica(L,Classifica).
+sfide(M,[T|C],L,Classifica):-
+    sfide(M,C,L,NewClassifica),
+    sfida_campionato(M, T, P1, P2),!,
+    aggiungi_risultato(NewClassifica, M, P1, Classifica1),
+    aggiungi_risultato(Classifica1, T, P2, Classifica).
 
-sfide( _, [], _, [], [], 0).
-sfide(M, [T|C], Hypo, NewClassifica, HypoList, SfideNMatches):-
-    sfide(M, C, Hypo, Classifica, OldHypoList, OldNMatches),
-    sfida(M, T, W, Hypo, H),
-    SfideNMatches is OldNMatches + 1,
-    append([H], OldHypoList, HypoList),
-    %nl, write(M), nl,
-    %write( ' VS '),
-    %nl, write(T), nl,
-    append(Classifica, W, NewClassifica).
+%crea una classifica vuota, assegnando uno zero accanto ad una memoria
+%crea_classifica(-ListadiMemorie, +Classifica)
+crea_classifica([],[]).
+crea_classifica([T|C],Classifica):-
+    crea_classifica(C,NewClassifica),
+    append([0-T],NewClassifica,Classifica).
 
-conta_occorrenze(_,[],0).
-conta_occorrenze(X,[T|C],Occorrenze) :-
-    conta_occorrenze(X,C,OldOccorrenze),
-    conta_in_lista(X,T,Cont),
-    !,
-    Occorrenze is OldOccorrenze + Cont.
+%aggiorna il risultato di una memoria
+%aggiungi_risultato(-Classifica,-W,-Punti,+NuovaClassifica)
+aggiungi_risultato([N-T|C], W, Punti, Classifica):-
+    T \== W,
+    aggiungi_risultato(C,W,Punti,NewClassifica),
+    append([N-T],NewClassifica,Classifica);
+    T == W,
+    N1 is N + Punti,
+    Classifica = [N1-W|C].
 
-conta_in_lista(_,[],0).
-conta_in_lista(X,[X|C],Cont) :-
-    conta_in_lista(X,C,O),
-    Cont is O + 1.
-conta_in_lista(X,[T|C],Cont) :-
-    C \= T,
-    conta_in_lista(X,C,Cont).
+% funziona come sfida solo che assegna 0 punti al perdente o 3 punti al
+% vincente mentre in caso di pareggio assegna 1 punto a chi iniziato per
+% primo e 2 punti al secondo
+% sfida_campionato(-MemoriaPrimoGiocatore, -MemoriaSecondoGiocatore,
+% +Punti1, +Punti2)
+sfida_campionato(M1, M2,P1,P2) :-
+    retractall(on(_,_,a)),
+    retractall(on(_,_,b)),
+    retractall(on(_,_,h)),
+    hole(),
+    partita_campionato(M1, M2, a,P1,P2).
+
+partita_campionato(_, _, _,1,2) :-   %potrebbe vincere all'ultima mossa
+    pareggio().
+
+partita_campionato(_,_, _,P1,P2) :-
+    win(W),
+    (
+        W == a,
+        P1 = 3,
+        P2 = 0;
+        W == b,
+        P1 = 0,
+        P2 = 3
+    ).
+
+partita_campionato(M1, M2, a, P1,P2):-
+    alpha_beta(a,C,2,M1,_),
+    mossa(C,a,_),
+    partita_campionato(M1, M2, b, P1,P2).
+
+partita_campionato(M1, M2, b, P1,P2):-
+    alpha_beta(b,C,2,M2,_),
+    mossa(C,b,_),
+    partita_campionato(M1, M2, a, P1,P2).
+
+%unisce i punteggi di 2 classifiche che si sono formate dai gironi
+%unisci_classifiche( -ClassificaVecchia, -Classifica, +NuovaClassifica)
+unisci_classifiche([],L,L).
+unisci_classifiche([N-T|C],[N1-T1|C1],Classifica):-
+    N >= N1,
+    unisci_classifiche(C,C1,NewClassifica),
+    append([N-T],NewClassifica,Classifica);
+    N < N1,
+    unisci_classifiche(C,C1,NewClassifica),
+    append([N1-T1],NewClassifica,Classifica).

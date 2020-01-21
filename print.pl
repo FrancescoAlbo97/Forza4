@@ -1,7 +1,8 @@
 %:- [test2]
 
 print :-
-    print_board(1,6).
+    print_board(1,6),
+    nl,write('//////////////////////'),nl.
 
 print_board(8,1) :-
     nl, !.
