@@ -27,6 +27,7 @@ forza4():-
     inizializza(),
     write('inserisci la memoria di partenza: '),nl,
     read(M),
+    retractall(memory(_)),
     assert(memory(M)),
     giochiamo_con_memoria().
 
