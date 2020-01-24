@@ -56,9 +56,6 @@ sfida_campionato(M1, M2,P1,P2) :-
     hole(),
     partita_campionato(M1, M2, a,P1,P2).
 
-partita_campionato(_, _, _,1,2) :-   %potrebbe vincere all'ultima mossa
-    pareggio().
-
 partita_campionato(_,_, _,P1,P2) :-
     win(W),
     (
@@ -70,13 +67,18 @@ partita_campionato(_,_, _,P1,P2) :-
         P2 = 3
     ).
 
+partita_campionato(_, _, _,1,2) :-
+    pareggio().
+
 partita_campionato(M1, M2, a, P1,P2):-
-    alpha_beta(a,C,2,M1,_),
+    profondita(P),
+    alpha_beta(a,C,P,M1,_),
     mossa(C,a,_),
     partita_campionato(M1, M2, b, P1,P2).
 
 partita_campionato(M1, M2, b, P1,P2):-
-    alpha_beta(b,C,2,M2,_),
+    profondita(P),
+    alpha_beta(b,C,P,M2,_),
     mossa(C,b,_),
     partita_campionato(M1, M2, a, P1,P2).
 

@@ -18,12 +18,7 @@ sfida(Knowledge1, Knowledge2, Winner, Hypo, History) :-
 % Knowledge2, se prima di fare la mossa uno dei giocatori ha vinto,
 % viene restituito il vincitore. Per Hypo e History guardare sfida
 % partita(+Knowledge1, +Knowledge2, +Player, -Winner, +Hypo, -History)
-
-partita(_, Knowledge2, _, Knowledge2, Hypo, History) :-   %potrebbe vincere all'ultima mossa!!!!!!!
-    pareggio(),
-    length(Hypo, N),
-    lista_omogenea(N, [b], History).
-
+%
 partita(Knowledge1, Knowledge2, _, Winner, Hypo, History) :-
     win(W),
     (
@@ -35,14 +30,21 @@ partita(Knowledge1, Knowledge2, _, Winner, Hypo, History) :-
     length(Hypo, N),
     lista_omogenea(N,[W], History).
 
+partita(_, Knowledge2, _, Knowledge2, Hypo, History) :-
+    pareggio(),
+    length(Hypo, N),
+    lista_omogenea(N, [b], History).
+
 partita(Knowledge1, Knowledge2, a, Winner, Hypo, History):-
     corrobora(Hypo, R),
-    alpha_beta(a, C, 2, Knowledge1, _),
+    profondita(P),
+    alpha_beta(a, C, P, Knowledge1, _),
     mossa(C, a, _),
     partita(Knowledge1, Knowledge2, b, Winner, Hypo, NHistory),
     append2(NHistory, R, History).
 
 partita(Knowledge1, Knowledge2, b, Winner, Hypo, History):-
-    alpha_beta(b, C, 2, Knowledge2, _),
+    profondita(P),
+    alpha_beta(b, C, P, Knowledge2, _),
     mossa(C, b, _),
     partita(Knowledge1, Knowledge2, a, Winner, Hypo, History).

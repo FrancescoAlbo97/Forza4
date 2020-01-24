@@ -12,6 +12,7 @@
 :- [strategia_cpu].
 :- [genetica].
 :- [impara_da_solo].
+:- [correction].
 
 profondita(2).
 
@@ -51,7 +52,7 @@ giochiamo_insieme(Knowledge):-
 
 inizio(A, Knowledge):-
     A == 'si', nl,
-    partita_umano(Knowledge);
+    partita_umano(Knowledge,4);
     A == 'no', nl,
     partita_cpu(Knowledge);
     A == 'm', nl,
@@ -70,7 +71,7 @@ inizio(A, Knowledge):-
 partita_cpu(Knowledge) :-
     win(_),
     print,
-    nl, write('game over'),nl,
+    nl, write('game over in cpu'),nl,
     write('quante generazioni creo?'),
     read(A),
     inizio_allenamento(Knowledge, NKnowledge, A),
@@ -87,35 +88,49 @@ partita_cpu(Knowledge):-
     alpha_beta(b, Mossa, P, Knowledge, _),
     mossa(Mossa, b, _),
     print,
-    partita_umano(Knowledge).
+    partita_umano(Knowledge,Mossa).
 
-partita_umano(Knowledge):-
+partita_umano(Knowledge,_):-
     win(_),
     print,
-    nl, write('game over'),nl,
+    nl, write('game over in umano'),nl,
     write('quante generazioni produco? '),
     read(A),
     inizio_allenamento(Knowledge, NKnowledge, A),
     retractall(memory(_)),
     assert(memory(NKnowledge)).
 
-partita_umano(_) :-
+partita_umano(_,_) :-
     pareggio(),
     print,
     nl, write('partita patta'),nl.
 
-partita_umano(Knowledge):-
+partita_umano(Knowledge,Mossa):-
     nl, write('scegli colonna:'),
     read(X),
-    prova_mossa(X, Knowledge),
-    !,
-    partita_cpu(Knowledge).
+    correggi_mossa(Knowledge,Mossa,X).
 
-prova_mossa(X, Knowledge):-
+correggi_mossa(Knowledge,Mossa,X):-
+    X < 10,
+    prova_mossa(X, Knowledge,Mossa),
+    !,
+    partita_cpu(Knowledge);
+    C is floor(X/10),
+    write('correggo '), write(C),
+    correggi(Knowledge, NKnowledge, C, Mossa),
+    X1 is (X - (C*10)),
+    write(' e poi faccio '), write(X1), nl,
+    correggi_mossa(NKnowledge,Mossa,X1);
+    writeln('Mossa inserita non valida, riprova'),
+    read(NX),
+    correggi_mossa(Knowledge,Mossa,NX).
+
+
+prova_mossa(X, Knowledge,Mossa):-
     mossa(X,a,E),
     E \= 1;
     nl, write('colonna piena, riprova'),
-    partita_umano(Knowledge).
+    partita_umano(Knowledge,Mossa).
 
 
 

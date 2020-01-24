@@ -24,7 +24,7 @@ azioni_successori(PosAzioni) :-
 % ha vinto, mentre un punteggio negativose il vincitore è a)
 % 2) si è giunti alla profondità massima, in questo caso si valuta lo
 % stato secondo la funzione di valutazione denotata dalla conoscenza del
-% giocatore. 
+% giocatore.
 % check_foglia(+Memory,-Punteggio,+Depth,+MaxDepth)
 check_foglia(_,Punteggio,Depth,MaxDepth) :-
     win(b),
