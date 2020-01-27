@@ -35,10 +35,13 @@ forza4():-
 
 giochiamo_con_memoria():-
     memory(M),
-    giochiamo_insieme(M),
-    giochiamo_con_memoria().
+    giochiamo_insieme(M, Quit),
+    (
+        Quit == 1;
+        giochiamo_con_memoria()
+    ).
 
-giochiamo_insieme(Knowledge):-
+giochiamo_insieme(Knowledge, Quit):-
     storedMemory(SM),
     append(SM,[Knowledge],NKnowledge),
     assert(storedMemory(NKnowledge)),
@@ -55,28 +58,28 @@ giochiamo_insieme(Knowledge):-
     writeln('- s per salvare la memoria su un file (memoria.txt)'),
     writeln('- q per uscire dal programma'),
     read(A),
-    inizio(A, Knowledge).
+    inizio(A, Knowledge, Quit).
 
-inizio(A, Knowledge):-
+inizio(A, Knowledge, Quit):-
     A == 'si', nl,
     partita_umano(Knowledge,4);
     A == 'no', nl,
     partita_cpu(Knowledge);
     A == 'm', nl,
     write(Knowledge),nl,
-    giochiamo_insieme(Knowledge);
+    giochiamo_insieme(Knowledge, Quit);
     A == 'g',
     grafico_allenamento,
-    giochiamo_insieme(Knowledge);
+    giochiamo_insieme(Knowledge, Quit);
     A == 's',
     memory(M),
     open('memoria.txt',write,OutMemoria),
     write(OutMemoria,M),
     close(OutMemoria),
     writeln('Memoria salvata nel file memoria.txt'),
-    giochiamo_insieme(Knowledge);
-    A == 'q', !, fail;
-    giochiamo_insieme(Knowledge).
+    giochiamo_insieme(Knowledge, Quit);
+    A == 'q', Quit = 1;
+    giochiamo_insieme(Knowledge, Quit).
 
 partita_cpu(Knowledge) :-
     win(_),

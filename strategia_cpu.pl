@@ -1,28 +1,24 @@
 % Predicato che simula una mossa della cpu in una determinata colonna e 
 % ne calcola il punteggio.
-% simula(+Column, -Result, +Memory, +Player)
+% simula(+Column, -Result, +Knowledge, +Player)
 
-simula(C, R, Memory, a) :-
+simula(C, R, Knowledge, a) :-
    mossa(C, a, 0),
-   test(R1, a, Memory),
-   test(R2, b, Memory),
+   test(R1, a, Knowledge),
+   test(R2, b, Knowledge),
    R is R1 - R2,
    anti_mossa(C).
 
-% simula(_,L,L,_,a).
-
-simula(C, R, Memory, b) :-
+simula(C, R, Knowledge, b) :-
    mossa(C, b, 0),
-   test(R1, b, Memory),
-   test(R2, a, Memory),
+   test(R1, b, Knowledge),
+   test(R2, a, Knowledge),
    R is R1 - R2,
    anti_mossa(C).
-
-% simula(_,L,L,_,b).
 
 % Predicato che, data una conoscenza composta da condizioni, 
 % calcola il punteggio dello stato corrente per il giocatore G.
-% test(-Result, +Player, +Memory) 
+% test(-Result, +Player, +Knowledge) 
 
 test(R, G, [[T|C]|CC]) :-            % [[P1, b, 0, 0, a, 3, 2], ...]
    findall(_, condizione(C, _, _, G), L1),
@@ -76,7 +72,7 @@ condizione([S, DX, DY|C], X, Y, b) :-
     ),!,
     X1 is X + DX,
     Y1 is Y + DY,
-    member(X1, [0,1,2,3,4,5,6,7,8]), %inserire il bordo
+    member(X1, [0,1,2,3,4,5,6,7,8]),
     member(Y1, [0,1,2,3,4,5,6,7]),
     (
         S == 'a',
