@@ -283,8 +283,8 @@ prendi_coordinate2(X1,Y1,X2,Y2):-
 
 corrobora([T|C], Result) :-
     corrobora(C, PR),
-    test(R1, a, T, _, _),
-    test(R2, b, T, _, _),
+    test(R1, a, T),
+    test(R2, b, T),
     R is R1 - R2,
     append([R], PR, Result).
 

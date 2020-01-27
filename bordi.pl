@@ -1,3 +1,7 @@
+% Definizione di tutti i bordi della scacchiera, 
+% necessari per il funzionamento del gioco
+% e per la corretta definizione delle osservazioni
+
 on(0,0,c).
 on(1,0,c).
 on(2,0,c).
@@ -28,6 +32,10 @@ on(4,7,c).
 on(5,7,c).
 on(6,7,c).
 on(7,7,c).
+
+% Predicato che, all'inizio della partita, inizializza 
+% la scacchiera con i buchi (che denotano l'assenza di 
+% gettoni).
 
 hole() :-
     assert(on(1,1,h)),

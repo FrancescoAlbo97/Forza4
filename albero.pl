@@ -2,8 +2,8 @@
 % base alla conoscenza del giocatore
 % punteggio_stato(+Memory,-Risultato)
 punteggio_stato(Memory,R) :-
-   test(R1, b, Memory, _, _),
-   test(R2, a, Memory, _, _),
+   test(R1, b, Memory),
+   test(R2, a, Memory),
    R is R1 - R2.
 
 % Dato lo stato attuale, trova tutte le azioni che un giocatore può fare

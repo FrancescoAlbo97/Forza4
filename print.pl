@@ -1,4 +1,6 @@
-%:- [test2]
+
+% Predicato che stampa la scacchiera della 
+% partita corrente.
 
 print :-
     print_board(1,6),
@@ -6,12 +8,10 @@ print :-
 
 print_board(8,1) :-
     nl, !.
-
 print_board(8,Y) :-
     nl,
     NY is Y-1,
     print_board(1,NY), !.
-
 print_board(X,Y) :-
     X < 8,
     Y < 7,

@@ -3,8 +3,8 @@ correggi(Memory, NMemory, Right_column, Wrong_column) :-
 %    print,
 %    write(Memory),nl,
     anti_mossa(Wrong_column),
-    simula(Right_column, [], [Value1-_], Memory, b),
-    simula(Wrong_column, [], [Value2-_], Memory, b),
+    simula(Right_column, Value1, Memory, b),
+    simula(Wrong_column, Value2, Memory, b),
 %    write('valutazione mossa sbagliata: '),write(Value2),nl,
 %    write('valutazione mossa giusta: '),write(Value1),nl,
     Diff is Value2 - Value1,
@@ -17,8 +17,8 @@ correggi(Memory, NMemory, Right_column, Wrong_column) :-
          NMemory = Memory
     ),
     mossa(Wrong_column,b,_).
-%    simula(Right_column, [], [Value3-_], NMemory, b),
-%    simula(Wrong_column, [], [Value4-_], NMemory, b),
+%    simula(Right_column, Value3, NMemory, b),
+%    simula(Wrong_column, Value4, NMemory, b),
 %    simula2(Right_column, Right_rating2, NMemory),
 %    simula2(Wrong_column, Wrong_rating2, NMemory),
 %    write('new valutazione mossa sbagliata: '),write(Value4),nl,

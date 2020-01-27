@@ -1,42 +1,40 @@
-gioca(C, Memory, G) :-
-   simula(1, [], L1, Memory, G),
-   simula(2, L1, L2, Memory, G),
-   simula(3, L2, L3, Memory, G),
-   simula(4, L3, L4, Memory, G),
-   simula(5, L4, L5, Memory, G),
-   simula(6, L5, L6, Memory, G),
-   simula(7, L6, L7, Memory, G),
-   sort(L7, L),
-   last(L, _-C),
-   mossa(C, G, 0).
+% Predicato che simula una mossa della cpu in una determinata colonna e 
+% ne calcola il punteggio.
+% simula(+Column, -Result, +Memory, +Player)
 
-simula(C, L, NL, Memory, a) :-
+simula(C, R, Memory, a) :-
    mossa(C, a, 0),
-   test(R1, a, Memory, _, _),
-   test(R2, b, Memory, _, _),
+   test(R1, a, Memory),
+   test(R2, b, Memory),
    R is R1 - R2,
-   anti_mossa(C),
-   append([R-C], L, NL).
+   anti_mossa(C).
 
-simula(_,L,L,_,a).
+% simula(_,L,L,_,a).
 
-simula(C, L, NL, Memory, b) :-
+simula(C, R, Memory, b) :-
    mossa(C, b, 0),
-   test(R1, b, Memory, _, _),
-   test(R2, a, Memory, _, _),
+   test(R1, b, Memory),
+   test(R2, a, Memory),
    R is R1 - R2,
-   anti_mossa(C),
-   append([R-C], L, NL).
+   anti_mossa(C).
 
-simula(_,L,L,_,b).
+% simula(_,L,L,_,b).
 
-test(R, G, [[T|C]|CC], X, Y) :-            % [[P1, b, 0, 0, a, 3, 2], ...]
-   findall(_, condizione(C, X, Y, G), L1),
+% Predicato che, data una conoscenza composta da condizioni, 
+% calcola il punteggio dello stato corrente per il giocatore G.
+% test(-Result, +Player, +Memory) 
+
+test(R, G, [[T|C]|CC]) :-            % [[P1, b, 0, 0, a, 3, 2], ...]
+   findall(_, condizione(C, _, _, G), L1),
    length(L1, RR),
    R1 is RR * T,
-   test(NR, G, CC, _, _),
+   test(NR, G, CC),
    R is R1 + NR.
-test(0, _, [], _, _).
+test(0, _, []).
+
+% Predicato che viene utilizzato per verificare se la condizione 
+% specificata si verifica nella scacchiera per il giocatore G.
+% condizione(+Condition, +X, +Y, +G)
 
 condizione([S, 0, 0|C], X, Y, a) :-
     member(X, [1,2,3,4,5,6,7]),
