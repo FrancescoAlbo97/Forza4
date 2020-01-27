@@ -90,7 +90,26 @@ listaN(N, L) :-
     append(PL, [N], L),
     !.
 
+% Funzione che, a partire da due liste date, restituisce una terza lista data dalla differenza, 
+% elemento per elemento, della seconda lista con la prima
+% delta(+Lista1, +Lista2, -Lista_diff)
 
+delta([], [], []).
+
+delta([T1|C1], [T2|C2], Delta_list) :-
+    Diff is T2 - T1,
+    delta(C1, C2, PDelta_list),
+    append([Diff], PDelta_list, Delta_list).
+
+% Funzione che, a partire da una lista data, restitusce la somma dei moduli di tutti i suoi elementi 
+% abs_sum(+Lista, -Risultato)
+
+abs_sum([], 0).
+
+abs_sum([T|C], Somma) :-
+    abs_sum(C, PSomma),
+    abs(T, AbsT),
+    Somma is PSomma + AbsT.
 
 
 

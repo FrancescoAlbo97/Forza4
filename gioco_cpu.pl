@@ -18,7 +18,7 @@ sfida(Knowledge1, Knowledge2, Winner, Hypo, History) :-
 % Knowledge2, se prima di fare la mossa uno dei giocatori ha vinto,
 % viene restituito il vincitore. Per Hypo e History guardare sfida
 % partita(+Knowledge1, +Knowledge2, +Player, -Winner, +Hypo, -History)
-%
+
 partita(Knowledge1, Knowledge2, _, Winner, Hypo, History) :-
     win(W),
     (

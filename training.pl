@@ -4,6 +4,12 @@ punteggio_osservazione1(25).
 sogliaMin(-5).
 sogliaMax(5).
 
+% Predicato che determina l'inizio dell'allenamento, creando e
+% componendo delle nuove osservazioni, e avvia la fase di allenamento,
+% determinando una nuova conoscenza dopo un certo numero di iterazioni
+% dell'algoritmo genetico.
+% inizio_allenamento(+Memory, -NewMemory, +Iterations)
+
 inizio_allenamento(Memory, NewMemory, Iterations) :-
     osserva([], Hypo1),
     osserva(Hypo1, Hypo2),
@@ -19,8 +25,13 @@ inizio_allenamento(Memory, NewMemory, Iterations) :-
     componi(4,Memory, Hypo11, Hypo12),
     componi(4,Memory, Hypo12, Hypo13),
     componi(4,Memory, Hypo13, Hypo14),
-    allena(Memory, Hypo14, NewMemory, Iterations),
-    write('allora...   '),nl.
+    writeln('Allenamento in corso...'),
+    allena(Memory, Hypo14, NewMemory, Iterations).
+
+% Predicato in cui viene fatto l'allenamento, modificando i pesi delle
+% conoscenze, avviando il torneo ed applicando l'algoritmo genetico con
+% un certo numero di iterazioni.
+% allena(+Memory, +Hypo, -NWinner, +Iterations)
 
 allena(Memory, Hypo, NWinner, Iterations) :-
     eliminaZeri(Memory, MemoryA),
@@ -38,11 +49,11 @@ allena(Memory, Hypo, NWinner, Iterations) :-
         NIterations is Iterations - 1,
         allena(Winner, [], NWinner, NIterations);
         Ranking = [NWinner|_],
-        write('nuova memoria: '),write(NWinner),nl,
-        write('"bene" '),nl
+        write('Nuova memoria: '),write(NWinner),nl,
+        writeln('Fine allenamento')
     ).
 
-% modifica i pesi di tutte le condizioni di una data conoscenza in
+% Modifica i pesi di tutte le condizioni di una data conoscenza in
 % maniera casuale, con M si specifica un moltiplicatore che amplifica il
 % range di variazione
 % modifica(+Knowledge, -NKnowledge, +M)
@@ -60,7 +71,7 @@ modifica([[Weight|C]|CC], NKnowledge, M) :-
 
 modifica([], [], _).
 
-% vengono dati in ingresso 8 conoscenze e viene simulato un torneo ad
+% Vengono dati in ingresso 8 conoscenze e viene simulato un torneo ad
 % eliminazione diretta, i 4 migliori in classifica vengono poi
 % arricchiti (con agg_class) di nuove condizioni (appartenenti ad Hypo)
 % testate durante il torneo tramite corrobora, e poi valutate dentro
@@ -81,12 +92,11 @@ torneo(K0, K1, K2, K3, K4, K5, K6, K7, Hypo, NNRanking) :-
     impara([], NConds, Hypo, [H1, H2, H3, H4, H5, H6, H7], NHypo, 7),
     agg_class(NRanking, NConds, NNRanking).
 
-% aggiunge le condizioni corroborate a tutti i giocatori in classifica
+% Aggiunge le condizioni corroborate a tutti i giocatori in classifica
 % agg_class(+Ranking, +Conditions, -Result)
 
 agg_class([T|C], NConds, R) :-
     agg_class(C, NConds, PR),
-    %append(T,NConds,NR),
     aggiungi_condizioni(NConds,T,NR),
     append(PR, [NR], R).
 
@@ -210,11 +220,11 @@ add_cond([T|Cond], Memory, NNMemory) :-
     append([[P2|Cond]], NMemory, NNMemory).
 
 
-% tutte le osservazioni con un peso inferiore di 4 vengono
-% dimenticate
+% Elimina tutte le osservazioni che hanno un peso compreso tra le siglie
+% di Min e Max
+% eliminaZeri(+Memory, -NewMemory)
 
-eliminaZeri([[T|C]|CC], NMemory) :-    %se si fa fallire trova altre soluzioni
-   % T \== [[]],
+eliminaZeri([[T|C]|CC], NMemory) :-
     eliminaZeri(CC, Memory),
     sogliaMin(Min),
     sogliaMax(Max),
@@ -229,8 +239,9 @@ eliminaZeri([[T|C]|CC], NMemory) :-    %se si fa fallire trova altre soluzioni
 
 eliminaZeri([], []).
 
-% viene osservata una nuova condizione creando una nuova potenziale
-% memoria. osserva(+Memory, -NNMemory)
+% Viene osservata una nuova condizione creando una nuova potenziale
+% memoria.
+% osserva(+Memory, -NNMemory)
 
 osserva( Memory, NNMemory) :-
     prendi_coordinate1(X1,Y1,G1),
@@ -250,9 +261,10 @@ osserva( Memory, NNMemory) :-
     P2 is -1 * P,
     append([[[P2|C]]],NMemory,NNMemory).
 
-%seleziona casualmente delle coordinate e la casella di riferimento
-% (che dovrà essere una dei 2 giocatori). prendi_coordinate1(-X1, -X2,
-% -G1)
+% Seleziona casualmente delle coordinate e la tessera di riferimento
+% (che dovrà essere una dei 2 giocatori).
+% prendi_coordinate1(-X1,-X2,-G1)
+
 prendi_coordinate1(X1,Y1,G1):-
     random_between(1, 7, X1),
     random_between(1, 6, Y1),
@@ -261,10 +273,11 @@ prendi_coordinate1(X1,Y1,G1):-
     G1 \= c;
     prendi_coordinate1(X1,Y1,G1).
 
-% seleziona casualmente delle coordinate in modo che rispettino le
-% regole di ordinamento e prenda qualsiasi tipo di casella
+% Seleziona casualmente delle coordinate in modo che rispettino le
+% regole di ordinamento e prenda qualsiasi tipo di tessera
 % di riferimento (che dovrà essere una dei 2 giocatori).
 % prendi_coordinate2(+X1, +Y1, -X2, -Y2)
+
 prendi_coordinate2(X1,Y1,X2,Y2):-
     random_between(X1, 8, X2),
     random_between(0, 7, Y2),
@@ -276,7 +289,7 @@ prendi_coordinate2(X1,Y1,X2,Y2):-
     !.
 
 % Restituisce come risultato una lista che contiene le valutazioni fatte
-% sullo stato corrente du gioco dall'insieme di condizioni
+% sullo stato corrente del gioco dall'insieme di condizioni
 % contenute su Hypo. L'ordine fra le due liste e consistente: [Cond1,
 % Cond2, ...] e [ValCond1, ValCond2, ...]
 % corrobora(+Hypo, -Result)
@@ -290,9 +303,9 @@ corrobora([T|C], Result) :-
 
 corrobora([], []).
 
-%sceglie casualmente 2 osservazioni e le fonde creandone una nuova
-%NOTA: le due osservazioni coinvolte non vengono eliminate
-%componi(+Conta, +Memory, +Hypo, -NNHypo)
+% Sceglie casualmente 2 osservazioni e le fonde creandone una nuova
+% NOTA: le due osservazioni coinvolte non vengono eliminate
+% componi(+Contatore, +Memory, +Hypo, -NNHypo)
 
 componi(0, _, Hypo, Hypo).
 
@@ -317,11 +330,13 @@ componi(Conta, Memory, Hypo, NNHypo) :-
         componi(Conta1, Memory, Hypo, NNHypo)
     ).
 
-% metodo utile per inserire le osservazioni in un ordine preciso, in
-% modo che dopo sia semplice il confronto per trovare i doppioni
-% ordine che non dipende da G ma solo da X e Y: le X in ordine
-% crescente, in caso siano uguali, le Y in ordine crescente
+% Metodo utile per inserire le osservazioni in un ordine preciso, in
+% modo che dopo sia semplice il confronto per trovare i doppioni.
+% L'ordine non dipende da G ma solo da X e Y: le X vengono inserite in
+% ordine crescente, nel caso in cui siano uguali si considerano le
+% Y in ordine crescente
 % append_ordinato(+Condizione, +G1, +X1, +Y1, -R)
+
 append_ordinato([G,X,Y|C],G1,X1,Y1,R) :-
     X1 < X,
     append([G1,X1,Y1,G,X,Y],C,R);
@@ -336,20 +351,25 @@ append_ordinato([G,X,Y|C],G1,X1,Y1,R) :-
 
 append_ordinato([], G1, X1, Y1, [G1, X1, Y1]).
 
-%sceglie il secondo numero casuale, escludendo il primo.
+% Sceglie il secondo numero casuale, diverso dal primo.
+% prendi_numero2(+Len, +N1, -N2)
+
 prendi_numero2(Len, N1, N2) :-
     random_between(1, Len, N2),
     N1 \= N2;
     prendi_numero2(Len, N1, N2),!.
 
-% aggiunge condizioni alla potenziale memoria in maniera ordinata
+% Aggiunge delle condizioni alla potenziale memoria in maniera ordinata
 % aggiungi_condizioni(+Conds, +Memory, -NewMemory)
+
 aggiungi_condizioni([T|C], Memory, NewMemory) :-
     aggiungi_condizione(T,Memory,PMemory),
     aggiungi_condizioni(C,PMemory,NewMemory).
 aggiungi_condizioni([],NewMemory,NewMemory).
 
-%metodo per aggiungere una condizione ad una memoria
+% Aggiunge una condizione alla potenziale memoria in memoria ordinata
+% aggiungi_condizione(+Conds, +Memory, -NewMemory)
+
 aggiungi_condizione([T,G,_,_|Cond], Memory, NNMemory):-
     relativo(G, Cond, Cond, Memory),
     inverti_punto_di_vista(G,Cond, Memory),
@@ -357,9 +377,10 @@ aggiungi_condizione([T,G,_,_|Cond], Memory, NNMemory):-
 
 aggiungi_condizione(_,Memory,Memory).
 
-% controllo che non esista la condizione con posizione relativa diversa
+% Controllo che non esista la condizione con posizione relativa diversa
 % ma stesso significato logico
 % relativo(+G, +Condizione, +Condizione, -Memory)
+
 relativo(_,[],_,_).
 relativo(G, [G1, DX, DY|C], Cond, Memory):-
     DX \= 0,
@@ -372,22 +393,24 @@ relativo(G, [G1, DX, DY|C], Cond, Memory):-
     \+ member([_|NewCond],Memory),
     relativo(G,C,Cond,Memory).
 
-%funzione ausiliaria per relativo
-cambia_condizione(DY,L, R):-
+% Funzione ausiliaria per relativo
+
+cambia_condizione(DY, L, R):-
     Y is DY*(-1),
-    cambia_condizione2(Y,L,[],R),!.
-cambia_condizione2(_,[],A,A).
-cambia_condizione2(DY, [G1, X1, Y1|C], A,R):-
+    cambia_condizione2(Y, L, [], R), !.
+cambia_condizione2(_, [], A, A).
+cambia_condizione2(DY, [G1, X1, Y1|C], A, R):-
    Y is Y1 + DY,
    Y \= 0,
-   append_ordinato(A, G1,X1,Y, NR),
+   append_ordinato(A, G1, X1, Y, NR),
    cambia_condizione2(DY, C, NR, R);
    cambia_condizione2(DY, C, A, R).
 
-%inverte il punto di vista di una condizione per un giocatore.
-% quando simula valuta la mossa del proprio avversario avra una sola
-% condizione che restituira un peso nella sommatoria e non due.
+% Inverte il punto di vista di una condizione per un giocatore.
+% Quando l'agente valuta la mossa del proprio avversario avra' una sola
+% condizione che restituira' un peso nella sommatoria e non due.
 % inverti_punto_di_vista(+G, +Condizione, +Memory)
+
 inverti_punto_di_vista(G,Cond,Memory):-
     scambia_giocatore(G,G1),
     inverti_punto_di_vista2(Cond,Cond1),

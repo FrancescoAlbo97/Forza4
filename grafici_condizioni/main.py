@@ -47,7 +47,6 @@ def main(inputFile, minLimit, selectedConditions):
             plot_condition(etichetta,coords,minLimit)
     
     plt.title('Andamento dei coefficienti')
-    #plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), shadow=True, ncol=7)
     datacursor(formatter='{label}'.format)
     plt.show()
 

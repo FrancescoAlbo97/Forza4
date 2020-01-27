@@ -35,7 +35,7 @@ impara_da_solo(N):-
 
 gioca_con_memoria(0):-
     vinte(V),
-    nl, write('scrappy ha vinto '),
+    nl, write('Scrappy ha vinto '),
     write(V), nl.
 gioca_con_memoria(N):-
     memory(M),
@@ -65,7 +65,7 @@ grafico_allenamento():-
 
 partita_cpu_sola(Knowledge) :-
     win(_),
-    nl, write('game over, ha vinto albero'),nl,
+    nl, write('Game over, ha vinto dojo'),nl,
     generazioni(G),
     inizio_allenamento(Knowledge, NKnowledge, G),
     retractall(memory(_)),
@@ -74,7 +74,7 @@ partita_cpu_sola(Knowledge) :-
 
 partita_cpu_sola(Knowledge) :-
     pareggio(),
-    nl, write('partita patta'),nl,
+    nl, write('Partita patta'),nl,
     generazioni(G),
     inizio_allenamento(Knowledge, NKnowledge, G),
     retractall(memory(_)),
@@ -84,13 +84,12 @@ partita_cpu_sola(Knowledge):-
     profondita_cpu(P),
     alpha_beta(b, Mossa, P, Knowledge, _),
     mossa(Mossa, b, _),
-    %print,
     partita_dojo(Knowledge).
 
 
 partita_dojo(Knowledge):-
     win(_),
-    nl, write('game over, ha vinto scrappy'),nl,
+    nl, write('Game over, ha vinto scrappy'),nl,
     vinte(V),
     V1 is V + 1,
     retractall(vinte(_)),
@@ -103,7 +102,7 @@ partita_dojo(Knowledge):-
 
 partita_dojo(Knowledge) :-
     pareggio(),
-    nl, write('partita patta'),nl,
+    nl, write('Partita patta'),nl,
     generazioni(G),
     inizio_allenamento(Knowledge, NKnowledge, G),
     retractall(memory(_)),
@@ -114,5 +113,4 @@ partita_dojo(Knowledge):-
     profondita_dojo(P),
     alpha_beta(a, Mossa, P, M, _),
     mossa(Mossa, a, _),
-    %print,
     partita_cpu_sola(Knowledge).

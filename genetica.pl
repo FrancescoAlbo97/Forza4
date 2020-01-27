@@ -9,7 +9,6 @@ genetica([K1, K2, K3, K4], Winner) :-
     accoppia(K1, K3, NK2),
     accoppia(K1, K4, NK3),
     accoppia(K2, K3, NK4),
-    %accoppia(K2, K4, NK5),
     campionato([K1, NK1, NK2, NK3, NK4], Winner).
 
 % Assume in ingresso due conoscenze e restituisce una nuova conscenza
