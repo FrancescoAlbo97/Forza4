@@ -8,9 +8,9 @@ sogliaMax(5).
 % componendo delle nuove osservazioni, e avvia la fase di allenamento,
 % determinando una nuova conoscenza dopo un certo numero di iterazioni
 % dell'algoritmo genetico.
-% inizio_allenamento(+Memory, -NewMemory, +Iterations)
+% inizio_allenamento(+Knowledge, -NewKnowledge, +Iterations)
 
-inizio_allenamento(Memory, NewMemory, Iterations) :-
+inizio_allenamento(Knowledge, NewKnowledge, Iterations) :-
     osserva([], Hypo1),
     osserva(Hypo1, Hypo2),
     osserva(Hypo2, Hypo3),
@@ -21,28 +21,28 @@ inizio_allenamento(Memory, NewMemory, Iterations) :-
     osserva(Hypo7, Hypo8),
     osserva(Hypo8, Hypo9),
     osserva(Hypo9, Hypo10),
-    componi(4,Memory, Hypo10, Hypo11),
-    componi(4,Memory, Hypo11, Hypo12),
-    componi(4,Memory, Hypo12, Hypo13),
-    componi(4,Memory, Hypo13, Hypo14),
+    componi(4,Knowledge, Hypo10, Hypo11),
+    componi(4,Knowledge, Hypo11, Hypo12),
+    componi(4,Knowledge, Hypo12, Hypo13),
+    componi(4,Knowledge, Hypo13, Hypo14),
     writeln('Allenamento in corso...'),
-    allena(Memory, Hypo14, NewMemory, Iterations).
+    allena(Knowledge, Hypo14, NewKnowledge, Iterations).
 
 % Predicato in cui viene fatto l'allenamento, modificando i pesi delle
 % conoscenze, avviando il torneo ed applicando l'algoritmo genetico con
 % un certo numero di iterazioni.
-% allena(+Memory, +Hypo, -NWinner, +Iterations)
+% allena(+Knowledge, +Hypo, -NWinner, +Iterations)
 
-allena(Memory, Hypo, NWinner, Iterations) :-
-    eliminaZeri(Memory, MemoryA),
-    modifica(MemoryA, Memory1, 1),
-    modifica(MemoryA, Memory2, 1),
-    modifica(MemoryA, Memory3, 2),
-    modifica(MemoryA, Memory4, 2),
-    modifica(MemoryA, Memory5, 3),
-    modifica(MemoryA, Memory6, 3),
-    modifica(MemoryA, Memory7, 5),
-    torneo(MemoryA, Memory1, Memory2, Memory3, Memory4, Memory5, Memory6, Memory7, Hypo, Ranking),
+allena(Knowledge, Hypo, NWinner, Iterations) :-
+    eliminaZeri(Knowledge, KnowledgeA),
+    modifica(KnowledgeA, Knowledge1, 1),
+    modifica(KnowledgeA, Knowledge2, 1),
+    modifica(KnowledgeA, Knowledge3, 2),
+    modifica(KnowledgeA, Knowledge4, 2),
+    modifica(KnowledgeA, Knowledge5, 3),
+    modifica(KnowledgeA, Knowledge6, 3),
+    modifica(KnowledgeA, Knowledge7, 5),
+    torneo(KnowledgeA, Knowledge1, Knowledge2, Knowledge3, Knowledge4, Knowledge5, Knowledge6, Knowledge7, Hypo, Ranking),
     (
         Iterations > 1,
         genetica(Ranking, Winner),
@@ -63,11 +63,11 @@ modifica([[Weight|C]|CC], NKnowledge, M) :-
     rangeMin(Min),
     rangeMax(Max),
     random_between(Min, Max, N),
-    modifica(CC, Memory, M),
+    modifica(CC, Knowledge, M),
     Weight2 is (Weight + ((N * (51 - AbsWeight)) / 50) * M),
     round(Weight2, NewWeight),
     append([NewWeight], C, NewCond),
-    append([NewCond], Memory, NKnowledge).
+    append([NewCond], Knowledge, NKnowledge).
 
 modifica([], [], _).
 
@@ -202,11 +202,11 @@ analizza_mosse([a], 0, a).
 
 analizza_mosse([b], 0, b).
 
-add_cond([T|Cond], Memory, NNMemory) :-
-    \+ member([_|Cond], Memory),
-    append([[T|Cond]], Memory, NNMemory);
-    recupera([_|Cond], Memory, [P|Cond]),
-    delete(Memory, [P|Cond], NMemory),
+add_cond([T|Cond], Knowledge, NNKnowledge) :-
+    \+ member([_|Cond], Knowledge),
+    append([[T|Cond]], Knowledge, NNKnowledge);
+    recupera([_|Cond], Knowledge, [P|Cond]),
+    delete(Knowledge, [P|Cond], NKnowledge),
     abs(P,PA),
     (
         T == 25,
@@ -217,15 +217,15 @@ add_cond([T|Cond], Memory, NNMemory) :-
         P1 = P
     ),
     round(P1, P2),
-    append([[P2|Cond]], NMemory, NNMemory).
+    append([[P2|Cond]], NKnowledge, NNKnowledge).
 
 
 % Elimina tutte le osservazioni che hanno un peso compreso tra le siglie
 % di Min e Max
-% eliminaZeri(+Memory, -NewMemory)
+% eliminaZeri(+Knowledge, -NewKnowledge)
 
-eliminaZeri([[T|C]|CC], NMemory) :-
-    eliminaZeri(CC, Memory),
+eliminaZeri([[T|C]|CC], NKnowledge) :-
+    eliminaZeri(CC, Knowledge),
     sogliaMin(Min),
     sogliaMax(Max),
     (
@@ -233,17 +233,17 @@ eliminaZeri([[T|C]|CC], NMemory) :-
             T > Max;
             T < Min
         ),
-        append([[T|C]], Memory, NMemory);
-        NMemory = Memory
+        append([[T|C]], Knowledge, NKnowledge);
+        NKnowledge = Knowledge
     ).
 
 eliminaZeri([], []).
 
 % Viene osservata una nuova condizione creando una nuova potenziale
 % memoria.
-% osserva(+Memory, -NNMemory)
+% osserva(+Knowledge, -NNKnowledge)
 
-osserva( Memory, NNMemory) :-
+osserva( Knowledge, NNKnowledge) :-
     prendi_coordinate1(X1,Y1,G1),
     punteggio_osservazione1(P),
     append([P], [G1,0,0], Condition1), %costante inizio
@@ -256,10 +256,10 @@ osserva( Memory, NNMemory) :-
          on(X2, Y2, G2)
     ),
     append(Condition1, [G2, DX, DY], Condition2),
-    append([[Condition2]], Memory, NMemory),
+    append([[Condition2]], Knowledge, NKnowledge),
     Condition2 = [_|C],
     P2 is -1 * P,
-    append([[[P2|C]]],NMemory,NNMemory).
+    append([[[P2|C]]],NKnowledge,NNKnowledge).
 
 % Seleziona casualmente delle coordinate e la tessera di riferimento
 % (che dovrà essere una dei 2 giocatori).
@@ -305,19 +305,19 @@ corrobora([], []).
 
 % Sceglie casualmente 2 osservazioni e le fonde creandone una nuova
 % NOTA: le due osservazioni coinvolte non vengono eliminate
-% componi(+Contatore, +Memory, +Hypo, -NNHypo)
+% componi(+Contatore, +Knowledge, +Hypo, -NNHypo)
 
 componi(0, _, Hypo, Hypo).
 
-componi(Conta, Memory, Hypo, NNHypo) :-
+componi(Conta, Knowledge, Hypo, NNHypo) :-
     Conta > 0,
     (
-        length(Memory, Len),
+        length(Knowledge, Len),
         Len > 1,             %per comporre devo avere almeno 2 elementi
         random_between(1, Len, N1),
         prendi_numero2(Len, N1, N2),
-        take(N1, Memory, [_,G,_,_|C]),
-        take(N2, Memory, [_,G1,_,_,G2,X,Y|_]),
+        take(N1, Knowledge, [_,G,_,_|C]),
+        take(N2, Knowledge, [_,G1,_,_,G2,X,Y|_]),
         G == G1,
         append_ordinato(C,G2,X,Y,R),
         punteggio_osservazione1(P),
@@ -327,7 +327,7 @@ componi(Conta, Memory, Hypo, NNHypo) :-
         append([[C1]], Hypo, NHypo),
         append([[C2]], NHypo, NNHypo);
         Conta1 is Conta - 1,
-        componi(Conta1, Memory, Hypo, NNHypo)
+        componi(Conta1, Knowledge, Hypo, NNHypo)
     ).
 
 % Metodo utile per inserire le osservazioni in un ordine preciso, in
@@ -360,38 +360,38 @@ prendi_numero2(Len, N1, N2) :-
     prendi_numero2(Len, N1, N2),!.
 
 % Aggiunge delle condizioni alla potenziale memoria in maniera ordinata
-% aggiungi_condizioni(+Conds, +Memory, -NewMemory)
+% aggiungi_condizioni(+Conds, +Knowledge, -NewKnowledge)
 
-aggiungi_condizioni([T|C], Memory, NewMemory) :-
-    aggiungi_condizione(T,Memory,PMemory),
-    aggiungi_condizioni(C,PMemory,NewMemory).
-aggiungi_condizioni([],NewMemory,NewMemory).
+aggiungi_condizioni([T|C], Knowledge, NewKnowledge) :-
+    aggiungi_condizione(T,Knowledge,PKnowledge),
+    aggiungi_condizioni(C,PKnowledge,NewKnowledge).
+aggiungi_condizioni([],NewKnowledge,NewKnowledge).
 
 % Aggiunge una condizione alla potenziale memoria in memoria ordinata
-% aggiungi_condizione(+Conds, +Memory, -NewMemory)
+% aggiungi_condizione(+Conds, +Knowledge, -NewKnowledge)
 
-aggiungi_condizione([T,G,_,_|Cond], Memory, NNMemory):-
-    relativo(G, Cond, Cond, Memory),
-    inverti_punto_di_vista(G,Cond, Memory),
-    add_cond([T,G,0,0|Cond], Memory, NNMemory).
+aggiungi_condizione([T,G,_,_|Cond], Knowledge, NNKnowledge):-
+    relativo(G, Cond, Cond, Knowledge),
+    inverti_punto_di_vista(G,Cond, Knowledge),
+    add_cond([T,G,0,0|Cond], Knowledge, NNKnowledge).
 
-aggiungi_condizione(_,Memory,Memory).
+aggiungi_condizione(_,Knowledge,Knowledge).
 
 % Controllo che non esista la condizione con posizione relativa diversa
 % ma stesso significato logico
-% relativo(+G, +Condizione, +Condizione, -Memory)
+% relativo(+G, +Condizione, +Condizione, -Knowledge)
 
 relativo(_,[],_,_).
-relativo(G, [G1, DX, DY|C], Cond, Memory):-
+relativo(G, [G1, DX, DY|C], Cond, Knowledge):-
     DX \= 0,
-    relativo(G,C,Cond,Memory);
+    relativo(G,C,Cond,Knowledge);
     delete(Cond,[G1,DX,DY], Cond1),
     cambia_condizione(DY, Cond1, R),!,
     Y is DY*(-1),
     append_ordinato(R,G,0,Y,R1),!,
     append([G1,0,0], R1, NewCond),
-    \+ member([_|NewCond],Memory),
-    relativo(G,C,Cond,Memory).
+    \+ member([_|NewCond],Knowledge),
+    relativo(G,C,Cond,Knowledge).
 
 % Funzione ausiliaria per relativo
 
@@ -409,14 +409,14 @@ cambia_condizione2(DY, [G1, X1, Y1|C], A, R):-
 % Inverte il punto di vista di una condizione per un giocatore.
 % Quando l'agente valuta la mossa del proprio avversario avra' una sola
 % condizione che restituira' un peso nella sommatoria e non due.
-% inverti_punto_di_vista(+G, +Condizione, +Memory)
+% inverti_punto_di_vista(+G, +Condizione, +Knowledge)
 
-inverti_punto_di_vista(G,Cond,Memory):-
+inverti_punto_di_vista(G,Cond,Knowledge):-
     scambia_giocatore(G,G1),
     inverti_punto_di_vista2(Cond,Cond1),
     append([G1,0,0], Cond1, NewCond),
-    \+ member([_|NewCond],Memory),
-    relativo(G1,NewCond,NewCond,Memory).
+    \+ member([_|NewCond],Knowledge),
+    relativo(G1,NewCond,NewCond,Knowledge).
 inverti_punto_di_vista2([],[]).
 inverti_punto_di_vista2([G,X,Y|Cond],NewCond):-
     inverti_punto_di_vista2(Cond,Cond1),

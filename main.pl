@@ -1,6 +1,6 @@
 :- dynamic on/3.
-:- dynamic storedMemory/1.
-:- dynamic memory/1.
+:- dynamic storedKnowledge/1.
+:- dynamic knowledge/1.
 :- [bordi].
 :- [training].
 :- [basic].
@@ -17,45 +17,45 @@
 % Profondità usata dalla potatura alfa-beta per scegliere la mossa
 profondita(2).
 
-inizializza():-
-    assert(storedMemory([])),
-    assert(memory([])),
-    retractall(storedMemory(_)),
-    retractall(memory(_)),
-    assert(storedMemory([])),
-    assert(memory([])).
+inizializza:-
+    assert(storedKnowledge([])),
+    assert(knowledge([])),
+    retractall(storedKnowledge(_)),
+    retractall(knowledge(_)),
+    assert(storedKnowledge([])),
+    assert(knowledge([])).
 
-forza4():-
-    inizializza(),
+forza4:-
+    inizializza,
     write('Inserisci la memoria di partenza: '),nl,
     read(M),
-    retractall(memory(_)),
-    assert(memory(M)),
-    giochiamo_con_memoria().
+    retractall(knowledge(_)),
+    assert(knowledge(M)),
+    giochiamo_con_memoria.
 
-giochiamo_con_memoria():-
-    memory(M),
+giochiamo_con_memoria:-
+    knowledge(M),
     giochiamo_insieme(M, Quit),
     (
         Quit == 1;
-        giochiamo_con_memoria()
+        giochiamo_con_memoria
     ).
 
 giochiamo_insieme(Knowledge, Quit):-
-    storedMemory(SM),
+    storedKnowledge(SM),
     append(SM,[Knowledge],NKnowledge),
-    assert(storedMemory(NKnowledge)),
-    retract(storedMemory(SM)),
+    assert(storedKnowledge(NKnowledge)),
+    retract(storedKnowledge(SM)),
     retractall(on(_,_,a)),
     retractall(on(_,_,b)),
     retractall(on(_,_,h)),
-    hole(),
+    hole,
     writeln('Selezionare tra le seguenti opzioni:'),
     writeln('- si per cominciare una partita giocando per primo'),
     writeln('- no per cominciare una partita giocando per secondo'),
-    writeln('- g per mostrare i grafici relativi allo storico per la memoria'),
-    writeln('- m per stampare a schermo la memoria della cpu'),
-    writeln('- s per salvare la memoria su un file (memoria.txt)'),
+    writeln('- g per mostrare i grafici relativi allo storico per la conoscenza'),
+    writeln('- m per stampare a schermo la conoscenza della cpu'),
+    writeln('- s per salvare la conoscenza su un file (conoscenza.txt)'),
     writeln('- q per uscire dal programma'),
     read(A),
     inizio(A, Knowledge, Quit).
@@ -72,11 +72,11 @@ inizio(A, Knowledge, Quit):-
     grafico_allenamento,
     giochiamo_insieme(Knowledge, Quit);
     A == 's',
-    memory(M),
-    open('memoria.txt',write,OutMemoria),
-    write(OutMemoria,M),
-    close(OutMemoria),
-    writeln('Memoria salvata nel file memoria.txt'),
+    knowledge(M),
+    open('conoscenza.txt',write,OutKnowledge),
+    write(OutKnowledge,M),
+    close(OutKnowledge),
+    writeln('Conoscenza salvata nel file conoscenza.txt'),
     giochiamo_insieme(Knowledge, Quit);
     A == 'q', Quit = 1;
     giochiamo_insieme(Knowledge, Quit).
@@ -84,15 +84,15 @@ inizio(A, Knowledge, Quit):-
 partita_cpu(Knowledge) :-
     win(_),
     print,
-    nl, write('Game over in cpu'),nl,
+    nl, write('Game over in cpu'), nl,
     write('Quante generazioni creo?'),
     read(A),
     inizio_allenamento(Knowledge, NKnowledge, A),
-    retractall(memory(_)),
-    assert(memory(NKnowledge)).
+    retractall(knowledge(_)),
+    assert(knowledge(NKnowledge)).
 
 partita_cpu(_) :-
-    pareggio(),
+    pareggio,
     print,
     nl, write('Partita patta'),nl.
 
@@ -106,15 +106,15 @@ partita_cpu(Knowledge):-
 partita_umano(Knowledge,_):-
     win(_),
     print,
-    nl, write('Game over in umano'),nl,
+    nl, write('Game over in umano'), nl,
     write('Quante generazioni produco? '),
     read(A),
     inizio_allenamento(Knowledge, NKnowledge, A),
-    retractall(memory(_)),
-    assert(memory(NKnowledge)).
+    retractall(knowledge(_)),
+    assert(knowledge(NKnowledge)).
 
 partita_umano(_,_) :-
-    pareggio(),
+    pareggio,
     print,
     nl, write('Partita patta'),nl.
 
@@ -125,9 +125,8 @@ partita_umano(Knowledge,Mossa):-
 
 correggi_mossa(Knowledge,Mossa,X):-
     X < 10,
-    prova_mossa(X, Knowledge,Mossa),
-    !,
-    partita_cpu(Knowledge);
+    prova_mossa(X, Knowledge, Mossa),
+    !;
     C is floor(X/10),
     correggi(Knowledge, NKnowledge, C, Mossa),
     writeln('Correzione applicata!'),
@@ -137,10 +136,10 @@ correggi_mossa(Knowledge,Mossa,X):-
     read(NX),
     correggi_mossa(Knowledge,Mossa,NX).
 
-
-prova_mossa(X, Knowledge,Mossa):-
+prova_mossa(X, Knowledge, Mossa):-
     mossa(X,a,E),
-    E \= 1;
+    E \= 1,
+    partita_cpu(Knowledge);
     nl, write('Colonna piena, riprova'),
     partita_umano(Knowledge,Mossa).
 

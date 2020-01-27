@@ -23,7 +23,7 @@ correggi(Knowledge, NKnowledge, Right_column, Wrong_column) :-
 
 simula2(C, L, Knowledge) :-
     mossa(C, b, 0),
-    test2(L, Knowledge, _, _),
+    test2(L, Knowledge),
     anti_mossa(C).
 
 % Funzione che valuta la board attuale attraverso una data conoscenza restituendo una lista di lunghezza pari al numero di osservazioni:

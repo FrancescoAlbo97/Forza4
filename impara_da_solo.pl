@@ -1,6 +1,6 @@
 :- dynamic on/3.
-:- dynamic storedMemory/1.
-:- dynamic memory/1.
+:- dynamic storedKnowledge/1.
+:- dynamic knowledge/1.
 :- dynamic vinte/1.
 :- [bordi].
 :- [training].
@@ -18,19 +18,19 @@ profondita_cpu(2).
 profondita_dojo(2).
 generazioni(3).
 
-inizializza_da_solo():-
+inizializza_da_solo:-
     assert(vinte(0)),
-    assert(storedMemory([])),
-    assert(memory([])),
+    assert(storedKnowledge([])),
+    assert(knowledge([])),
     retractall(vinte(_)),
-    retractall(storedMemory(_)),
-    retractall(memory(_)),
+    retractall(storedKnowledge(_)),
+    retractall(knowledge(_)),
     assert(vinte(0)),
-    assert(storedMemory([])),
-    assert(memory([])).
+    assert(storedKnowledge([])),
+    assert(knowledge([])).
 
 impara_da_solo(N):-
-    inizializza_da_solo(),
+    inizializza_da_solo,
     gioca_con_memoria(N).
 
 gioca_con_memoria(0):-
@@ -38,24 +38,24 @@ gioca_con_memoria(0):-
     nl, write('Scrappy ha vinto '),
     write(V), nl.
 gioca_con_memoria(N):-
-    memory(M),
+    knowledge(M),
     N1 is N -1,
     gioca_da_solo(M),
     gioca_con_memoria(N1).
 
 gioca_da_solo(Knowledge):-
-    storedMemory(SM),
+    storedKnowledge(SM),
     append(SM,[Knowledge],NKnowledge),
-    retractall(storedMemory(_)),
-    assert(storedMemory(NKnowledge)),
+    retractall(storedKnowledge(_)),
+    assert(storedKnowledge(NKnowledge)),
     retractall(on(_,_,a)),
     retractall(on(_,_,b)),
     retractall(on(_,_,h)),
-    hole(),
+    hole,
     partita_dojo(Knowledge).
 
-grafico_allenamento():-
-    storedMemory(SM),
+grafico_allenamento:-
+    storedKnowledge(SM),
     open('grafici_condizioni/output.txt',write,Out),
     write(Out,SM),
     close(Out),
@@ -68,17 +68,17 @@ partita_cpu_sola(Knowledge) :-
     nl, write('Game over, ha vinto dojo'),nl,
     generazioni(G),
     inizio_allenamento(Knowledge, NKnowledge, G),
-    retractall(memory(_)),
-    assert(memory(NKnowledge)).
+    retractall(knowledge(_)),
+    assert(knowledge(NKnowledge)).
 
 
 partita_cpu_sola(Knowledge) :-
-    pareggio(),
+    pareggio,
     nl, write('Partita patta'),nl,
     generazioni(G),
     inizio_allenamento(Knowledge, NKnowledge, G),
-    retractall(memory(_)),
-    assert(memory(NKnowledge)).
+    retractall(knowledge(_)),
+    assert(knowledge(NKnowledge)).
 
 partita_cpu_sola(Knowledge):-
     profondita_cpu(P),
@@ -96,17 +96,17 @@ partita_dojo(Knowledge):-
     assert(vinte(V1)),
     generazioni(G),
     inizio_allenamento(Knowledge, NKnowledge, G),
-    retractall(memory(_)),
-    assert(memory(NKnowledge)).
+    retractall(knowledge(_)),
+    assert(knowledge(NKnowledge)).
 
 
 partita_dojo(Knowledge) :-
-    pareggio(),
+    pareggio,
     nl, write('Partita patta'),nl,
     generazioni(G),
     inizio_allenamento(Knowledge, NKnowledge, G),
-    retractall(memory(_)),
-    assert(memory(NKnowledge)).
+    retractall(knowledge(_)),
+    assert(knowledge(NKnowledge)).
 
 partita_dojo(Knowledge):-
     memoria_dojo(M),

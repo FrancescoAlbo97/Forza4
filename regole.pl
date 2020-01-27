@@ -88,7 +88,7 @@ altezza_colonna(_,0).
 
 % Determina se c'è stata una condizione di pareggio. Ciò avviene quando
 % tutti gli spazi della riga più alta sono occupati.
-pareggio() :-
+pareggio :-
     \+ on(1,6,h),
     \+ on(2,6,h),
     \+ on(3,6,h),

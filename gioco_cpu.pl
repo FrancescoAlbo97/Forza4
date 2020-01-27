@@ -10,7 +10,7 @@ sfida(Knowledge1, Knowledge2, Winner, Hypo, History) :-
     retractall(on(_,_,a)),
     retractall(on(_,_,b)),
     retractall(on(_,_,h)),
-    hole(),
+    hole,
     partita(Knowledge1, Knowledge2, a, Winner, Hypo, History).
 
 % Partita fa eseguire una mossa ad uno dei giocatori coinvolti in sfida,
@@ -31,7 +31,7 @@ partita(Knowledge1, Knowledge2, _, Winner, Hypo, History) :-
     lista_omogenea(N,[W], History).
 
 partita(_, Knowledge2, _, Knowledge2, Hypo, History) :-
-    pareggio(),
+    pareggio,
     length(Hypo, N),
     lista_omogenea(N, [b], History).
 

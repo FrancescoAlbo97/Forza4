@@ -37,7 +37,7 @@ on(7,7,c).
 % la scacchiera con i buchi (che denotano l'assenza di 
 % gettoni).
 
-hole() :-
+hole :-
     assert(on(1,1,h)),
     assert(on(2,1,h)),
     assert(on(3,1,h)),

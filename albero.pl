@@ -33,7 +33,7 @@ check_foglia(_,Punteggio,Depth,MaxDepth) :-
     win(a),
     Punteggio is -1000000 / (MaxDepth - Depth + 1).
 check_foglia(_,0,_,_) :-
-    pareggio().
+    pareggio.
 check_foglia(Knowledge,Punteggio,0,_) :-
     punteggio_stato(Knowledge,Punteggio).
 

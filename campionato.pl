@@ -1,24 +1,27 @@
-%il campionato è una modilita di sfide tra le diverse memorie create,
+% Il campionato è una modalita' di sfide tra le diverse conoscenze create,
 % funziona come un unico girone all'italiana con una classifica a punti
 % una volta svoltosi il girone basterà ordinare la classifica per punti
 % e restituire il vincitore.
+
 campionato(L, Winner):-
     girone(L,Classifica),
     sort(Classifica, ClassificaOrdinata),
     last(ClassificaOrdinata,_-Winner).
 
-% data una lista di memorie, crea una classifica vuota e poi avvia
+% Data una lista di memorie, crea una classifica vuota e poi avvia
 % un girone on le sfide di una giornata e poi unisce i punti con
 % le classifiche successive
-%girone(-ListadiMemorie, +ClassificaNuova)
+% girone(-ListadiMemorie, +ClassificaNuova)
+
 girone([],[]).
 girone([T|C],Classifica) :-
     girone(C,Classifica1),
     sfide(T,C,[T|C],Classifica2),
     unisci_classifiche(Classifica1,Classifica2,Classifica).
 
-%sfide lancia sfida tra 2 memorie ed aggiorna la classifica
-%sfide(-Sfidante, -RestodelleMemorie, -L, +Classifica)
+% Predicato che lancia sfida tra 2 memorie ed aggiorna la classifica
+% sfide(-Sfidante, -RestodelleMemorie, -L, +Classifica)
+
 sfide(_,[],L,Classifica):-
     crea_classifica(L,Classifica).
 sfide(M,[T|C],L,Classifica):-
@@ -27,15 +30,17 @@ sfide(M,[T|C],L,Classifica):-
     aggiungi_risultato(NewClassifica, M, P1, Classifica1),
     aggiungi_risultato(Classifica1, T, P2, Classifica).
 
-%crea una classifica vuota, assegnando uno zero accanto ad una memoria
-%crea_classifica(-ListadiMemorie, +Classifica)
+% Crea una classifica vuota, assegnando uno zero accanto ad una memoria
+% crea_classifica(-ListadiMemorie, +Classifica)
+
 crea_classifica([],[]).
 crea_classifica([T|C],Classifica):-
     crea_classifica(C,NewClassifica),
     append([0-T],NewClassifica,Classifica).
 
-%aggiorna il risultato di una memoria
-%aggiungi_risultato(-Classifica,-W,-Punti,+NuovaClassifica)
+% aggiorna il risultato di una memoria
+% aggiungi_risultato(-Classifica,-W,-Punti,+NuovaClassifica)
+
 aggiungi_risultato([N-T|C], W, Punti, Classifica):-
     T \== W,
     aggiungi_risultato(C,W,Punti,NewClassifica),
@@ -49,11 +54,12 @@ aggiungi_risultato([N-T|C], W, Punti, Classifica):-
 % primo e 2 punti al secondo
 % sfida_campionato(-MemoriaPrimoGiocatore, -MemoriaSecondoGiocatore,
 % +Punti1, +Punti2)
+
 sfida_campionato(M1, M2,P1,P2) :-
     retractall(on(_,_,a)),
     retractall(on(_,_,b)),
     retractall(on(_,_,h)),
-    hole(),
+    hole,
     partita_campionato(M1, M2, a,P1,P2).
 
 partita_campionato(_,_, _,P1,P2) :-
@@ -68,7 +74,7 @@ partita_campionato(_,_, _,P1,P2) :-
     ).
 
 partita_campionato(_, _, _,1,2) :-
-    pareggio().
+    pareggio.
 
 partita_campionato(M1, M2, a, P1,P2):-
     profondita(P),
@@ -82,8 +88,9 @@ partita_campionato(M1, M2, b, P1,P2):-
     mossa(C,b,_),
     partita_campionato(M1, M2, a, P1,P2).
 
-%unisce i punteggi di 2 classifiche che si sono formate dai gironi
-%unisci_classifiche( -ClassificaVecchia, -Classifica, +NuovaClassifica)
+% Unisce i punteggi di 2 classifiche che si sono formate dai gironi
+% unisci_classifiche( -ClassificaVecchia, -Classifica, +NuovaClassifica)
+
 unisci_classifiche([],L,L).
 unisci_classifiche([N-T|C],[N1-T1|C1],Classifica):-
     N >= N1,
